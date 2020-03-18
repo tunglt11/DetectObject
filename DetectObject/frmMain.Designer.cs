@@ -49,12 +49,12 @@
             this.btnXemAnh = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.dgvDSLoi = new System.Windows.Forms.DataGridView();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.Loi = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ThoiGianLoi = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ViTriLoi = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Cuon = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Image = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -143,6 +143,7 @@
             this.txtVanToc.Name = "txtVanToc";
             this.txtVanToc.Size = new System.Drawing.Size(90, 22);
             this.txtVanToc.TabIndex = 4;
+            this.txtVanToc.Text = "0.5";
             // 
             // label4
             // 
@@ -234,6 +235,7 @@
             this.btnGopLoi.TabIndex = 7;
             this.btnGopLoi.Text = "Gộp lỗi";
             this.btnGopLoi.UseVisualStyleBackColor = true;
+            this.btnGopLoi.Click += new System.EventHandler(this.btnGopLoi_Click);
             // 
             // btnXemAnh
             // 
@@ -274,11 +276,6 @@
             this.dgvDSLoi.TabIndex = 0;
             this.dgvDSLoi.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDSLoi_CellClick);
             this.dgvDSLoi.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDSLoi_CellDoubleClick);
-            // 
-            // timer1
-            // 
-            this.timer1.Interval = 180000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Loi
             // 
@@ -325,6 +322,11 @@
             this.Image.ReadOnly = true;
             this.Image.Visible = false;
             this.Image.Width = 125;
+            // 
+            // timer1
+            // 
+            this.timer1.Interval = 180000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // frmMain
             // 

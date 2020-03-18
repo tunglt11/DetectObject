@@ -22,8 +22,8 @@ namespace DetectObject
         public CameraHelper CameraHelper;
         List<PlayPanel> PlayPanels = new List<PlayPanel>();
         List<DeviceInfo> DeviceInfos = new List<DeviceInfo>();
-        List<DiVat> DSDiVat;
-        BindingSource bsDiVat = new BindingSource();
+        public List<DiVat> DSDiVat;
+        public BindingSource bsDiVat = new BindingSource();
         bool IsScan = false;
         public frmMain()
         {
@@ -68,7 +68,7 @@ namespace DetectObject
                 string[] fileArray = Directory.GetFiles(LocalSetting.m_strRecordSavePath, "*.mp4");
                 if (fileArray.Length == 0 || !IsScan)
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(7000);
                 }
                 else
                 {
@@ -105,7 +105,7 @@ namespace DetectObject
                                     {
                                         var thoiDiemLoi = thamSo.ThoiGianBatDauLuuVideo.AddSeconds(currentFrame * OneFPS / 1000);
                                         var viTriLoi = (thoiDiemLoi - thamSo.ThoiGianBatDauCuon).TotalSeconds * Utilities.VanToc;
-                                        DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = thamSo.TenCuon, Image = CommonFunc.ImageToByte(inputImage.Bitmap) });
+                                        DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = thamSo.TenCuon, Image = CommonFunc.ConvertImageToByte(inputImage.Bitmap) });
                                         this.Invoke(new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); }));
                                         pictureBox1.Image = inputImage.Bitmap;
                                     }
@@ -187,7 +187,7 @@ namespace DetectObject
         {
             if (dgvDSLoi.SelectedRows.Count > 1)
             {
-                MessageBox.Show("Vui lòng chỉ chọn 1 dòng để xem ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error); ;
+                MessageBox.Show("Vui lòng chỉ chọn 1 lỗi để xem ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error); ;
                 return;    
             }
 
@@ -199,11 +199,11 @@ namespace DetectObject
             }
             else
             {
-                MessageBox.Show("Bạn chưa chọn dòng nào để xem ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Bạn chưa chọn lỗi nào để xem ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void DemLoi()
+        public void DemLoi()
         {
             lbDiVat.Text = DSDiVat.Count.ToString();
         }
@@ -224,6 +224,37 @@ namespace DetectObject
 
             int index = e.RowIndex;
             dgvDSLoi.Rows[index].Selected = true;
+        }
+
+        private void btnGopLoi_Click(object sender, EventArgs e)
+        {
+            if (dgvDSLoi.SelectedRows.Count <= 1)
+            {
+                MessageBox.Show("Bạn phải chọn ít nhất 2 lỗi để gộp ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (dgvDSLoi.SelectedRows.Count > 6)
+            {
+                MessageBox.Show("Bạn không thể chọn hơn 6 lỗi.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var dsChonDiVat = new List<DiVat>();
+            int maxIndex = dgvDSLoi.SelectedRows[0].Index;
+            foreach (DataGridViewRow row in dgvDSLoi.SelectedRows)
+            {
+                if (row.Index != maxIndex)
+                {
+                    MessageBox.Show("Vui lòng chọn các lỗi liên tiếp nhau.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                maxIndex -= 1;
+                dsChonDiVat.Add(DSDiVat.FirstOrDefault(d => d.Loi == (int)row.Cells["Loi"].Value));
+            }
+
+            var frmGopAnh = new frmGopAnhLoi(this, dsChonDiVat);
+            frmGopAnh.Show(this);
         }
     }
 }

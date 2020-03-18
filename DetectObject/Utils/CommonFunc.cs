@@ -21,13 +21,13 @@ namespace DetectObject.Utils
             return DateTime.ParseExact(date, "yyMMddHHmmss", DateTimeFormatInfo.InvariantInfo);
         }
 
-        public static byte[] ImageToByte(Bitmap img)
+        public static byte[] ConvertImageToByte(Bitmap img)
         {
             ImageConverter converter = new ImageConverter();
             return (byte[])converter.ConvertTo(img, typeof(byte[]));
         }
 
-        public static Bitmap ByteToImage(byte[] bytes)
+        public static Bitmap ConvertByteToImage(byte[] bytes)
         {
            return (Bitmap)((new ImageConverter()).ConvertFrom(bytes));
         }

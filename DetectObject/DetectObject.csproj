@@ -53,6 +53,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmGopAnhLoi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmGopAnhLoi.Designer.cs">
+      <DependentUpon>frmGopAnhLoi.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmHienThiAnhLoi.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,6 +86,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Utils\Utilities.cs" />
+    <EmbeddedResource Include="frmGopAnhLoi.resx">
+      <DependentUpon>frmGopAnhLoi.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmHienThiAnhLoi.resx">
       <DependentUpon>frmHienThiAnhLoi.cs</DependentUpon>
     </EmbeddedResource>
