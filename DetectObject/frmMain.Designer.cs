@@ -55,6 +55,7 @@
             this.Cuon = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Image = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.btnBatdau = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -197,7 +198,8 @@
             // 
             // btnSangCuon
             // 
-            this.btnSangCuon.Location = new System.Drawing.Point(806, 113);
+            this.btnSangCuon.Enabled = false;
+            this.btnSangCuon.Location = new System.Drawing.Point(806, 162);
             this.btnSangCuon.Name = "btnSangCuon";
             this.btnSangCuon.Size = new System.Drawing.Size(96, 83);
             this.btnSangCuon.TabIndex = 3;
@@ -207,7 +209,8 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(806, 217);
+            this.btnStop.Enabled = false;
+            this.btnStop.Location = new System.Drawing.Point(806, 266);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(96, 83);
             this.btnStop.TabIndex = 4;
@@ -328,11 +331,22 @@
             this.timer1.Interval = 180000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // btnBatdau
+            // 
+            this.btnBatdau.Location = new System.Drawing.Point(806, 53);
+            this.btnBatdau.Name = "btnBatdau";
+            this.btnBatdau.Size = new System.Drawing.Size(96, 83);
+            this.btnBatdau.TabIndex = 6;
+            this.btnBatdau.Text = "Bắt đầu";
+            this.btnBatdau.UseVisualStyleBackColor = true;
+            this.btnBatdau.Click += new System.EventHandler(this.btnBatdau_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(923, 678);
+            this.Controls.Add(this.btnBatdau);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.btnStop);
             this.Controls.Add(this.btnSangCuon);
@@ -385,6 +399,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ViTriLoi;
         private System.Windows.Forms.DataGridViewTextBoxColumn Cuon;
         private System.Windows.Forms.DataGridViewTextBoxColumn Image;
+        private System.Windows.Forms.Button btnBatdau;
     }
 }
 

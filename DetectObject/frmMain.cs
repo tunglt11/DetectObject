@@ -3,6 +3,7 @@ using DetectObject.Utils;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using GeneralDef;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,46 +22,46 @@ namespace DetectObject
     public partial class frmMain : Form
     {
         public CameraHelper CameraHelper;
-        List<PlayPanel> PlayPanels = new List<PlayPanel>();
-        List<DeviceInfo> DeviceInfos = new List<DeviceInfo>();
+        //List<PlayPanel> PlayPanels = new List<PlayPanel>();
+        //List<DeviceInfo> DeviceInfos = new List<DeviceInfo>();
         public List<DiVat> DSDiVat;
         public BindingSource bsDiVat = new BindingSource();
         bool IsScan = false;
         VideoCapture videoCapture = null;
+        double ViTriLoiMoiNhat = 0;
+        PictureBox pictureBoxCamera;
         public frmMain()
         {
             InitializeComponent();
-            CameraHelper = new CameraHelper(PlayPanels, DeviceInfos);
-            DSDiVat = new List<DiVat>();
-            #region Scan Object
-            Thread thread = new Thread(new ThreadStart(ScanObject));
-            thread.IsBackground = true;
-            thread.Start();
-            #endregion
+            //CameraHelper = new CameraHelper(PlayPanels, DeviceInfos);
+            BindingData();
+            CommonFunc.SetSavePath();
         }
 
         private void frmMain_Shown(object sender, EventArgs e)
         {
             #region Setup camera
-            Parallel.Invoke(() => { CameraHelper.SetupCamera(Constant.Camera); });
-            if (!CameraHelper.IsSetupBefore())
-            {
-                //Chơ setup camera
-                Thread.Sleep(2000);
-            }
-            if (CameraHelper.FindDeviceInfo(Constant.Camera) != null)
-            {
-                CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
-                CameraHelper.StartRealPlay(Constant.Camera);
-            }
-            else
-            {
-                MessageBox.Show("Không thể kết nối camera.", "Lỗi kết nối camera", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //Parallel.Invoke(() => { CameraHelper.SetupCamera(Constant.Camera); });
+            //if (!CameraHelper.IsSetupBefore())
+            //{
+            //    //Chơ setup camera
+            //    Thread.Sleep(2000);
+            //}
+            //if (CameraHelper.FindDeviceInfo(Constant.Camera) != null)
+            //{
+            //    CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
+            //    CameraHelper.StartRealPlay(Constant.Camera);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Không thể kết nối camera.", "Lỗi kết nối camera", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
+            pictureBoxCamera = new PictureBox();
+            pictureBoxCamera.Name = "camera";
+            pictureBoxCamera.Dock = DockStyle.Fill;
+            pictureBoxCamera.SizeMode = PictureBoxSizeMode.StretchImage;
+            tlpCamera.Controls.Add(pictureBoxCamera);
             #endregion
-
-            bsDiVat.DataSource = DSDiVat;
-            dgvDSLoi.DataSource = bsDiVat;
         }
 
         private async void ScanObject()
@@ -70,38 +71,41 @@ namespace DetectObject
             try
             {
                 Mat m = new Mat();
-                while (true)
+                videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera]);
+                if (videoCapture != null)
                 {
-                    if (IsScan && videoCapture != null)
+                    while (true)
                     {
                         videoCapture.Read(m);
-                        if (!m.IsEmpty)
+                        var inputImage = m.ToImage<Bgr, byte>();
+                        pictureBoxCamera.Image = inputImage.Bitmap;
+                        if (IsScan)
                         {
-                            var inputImage = m.ToImage<Bgr, byte>();
-                            if (detecter.DetectObject(inputImage))
+                            int heightOfObject;
+                            if (detecter.DetectObject(inputImage, out heightOfObject))
                             {
                                 var thoiDiemLoi = DateTime.Now;
-                                var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc;
-                                DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, Image = null });
-                                this.Invoke(ResetUI);
-                                pictureBox1.Image = inputImage.Bitmap;
+                                var viTriDiVatTrenAnh = Utilities.DoCao1KhungHinhThucTe * heightOfObject / inputImage.Height;
+                                var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc + viTriDiVatTrenAnh;
+                                if (viTriLoi - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
+                                {
+                                    DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, Image = CommonFunc.ResizeImage(CommonFunc.ConvertImageToByte(inputImage.Bitmap), 360) });
+                                    this.Invoke(ResetUI);
+                                    pictureBox1.Image = inputImage.Bitmap;
+                                }
                             }
-                            else
-                            {
-                                inputImage.Dispose();
-                            }
-
-                            await Task.Delay(200);
                         }
                         else
                         {
-                            break;
+                            Thread.Sleep(500);
                         }
+                        inputImage.Dispose();
+                        await Task.Delay(200);
                     }
-                    else
-                    {
-                        Thread.Sleep(500);
-                    }
+                }
+                else
+                {
+                    MessageBox.Show("Không thể kết nối camera.", "Lỗi kết nối camera", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
@@ -112,15 +116,19 @@ namespace DetectObject
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            CameraHelper.StopRealPlay(Constant.Camera);
-            CameraHelper.StopRecord(Constant.Camera);
+            //CameraHelper.StopRealPlay(Constant.Camera);
+            //CameraHelper.StopRecord(Constant.Camera);
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
             IsScan = false;
-            videoCapture.Dispose();
-            videoCapture = null;
+            btnSangCuon.Enabled = true;
+            btnStop.Enabled = false;
+            var json = JsonConvert.SerializeObject(DSDiVat);
+            File.WriteAllText(LocalSetting.m_strDataPath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".txt", json, Encoding.UTF8);
+            //videoCapture.Dispose();
+            //videoCapture = null;
             //CameraHelper.StopRecord(Constant.Camera);
             //timer1.Enabled = false;
             //timer1.Stop();
@@ -131,10 +139,13 @@ namespace DetectObject
             if (CommonFunc.IsNumber(txtVanToc.Text))
             {
                 IsScan = true;
-                videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera]);
+                ViTriLoiMoiNhat = 0;
+                btnSangCuon.Enabled = false;
+                btnStop.Enabled = true;
                 Utilities.VanToc = Convert.ToDouble(txtVanToc.Text);
                 Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
                 Utilities.TenCuon = "A".ToString();
+                BindingData();
                 //timer1.Enabled = true;
                 //timer1.Start();
                 //TaoVideo();
@@ -142,7 +153,7 @@ namespace DetectObject
             else
             {
                 MessageBox.Show("Trường vận tốc không đúng định dạng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }    
+            }
         }
 
         private void TaoVideo()
@@ -164,7 +175,7 @@ namespace DetectObject
             if (dgvDSLoi.SelectedRows.Count > 1)
             {
                 MessageBox.Show("Vui lòng chỉ chọn 1 lỗi để xem ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error); ;
-                return;    
+                return;
             }
 
             if (dgvDSLoi.CurrentRow.Selected)
@@ -204,6 +215,12 @@ namespace DetectObject
 
         private void btnGopLoi_Click(object sender, EventArgs e)
         {
+            if (btnStop.Enabled == true)
+            {
+                MessageBox.Show("Không thể gộp lỗi khi chương trình đang chạy.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (dgvDSLoi.SelectedRows.Count <= 1)
             {
                 MessageBox.Show("Bạn phải chọn ít nhất 2 lỗi để gộp ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -231,6 +248,24 @@ namespace DetectObject
 
             var frmGopAnh = new frmGopAnhLoi(this, dsChonDiVat);
             frmGopAnh.Show(this);
+        }
+
+        private void btnBatdau_Click(object sender, EventArgs e)
+        {
+            btnSangCuon.Enabled = true;
+            btnBatdau.Enabled = false;
+            #region Scan Object
+            Thread thread = new Thread(new ThreadStart(ScanObject));
+            thread.IsBackground = true;
+            thread.Start();
+            #endregion
+        }
+
+        private void BindingData()
+        {
+            DSDiVat = new List<DiVat>();
+            bsDiVat.DataSource = DSDiVat;
+            dgvDSLoi.DataSource = bsDiVat;
         }
     }
 }

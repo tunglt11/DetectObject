@@ -28,7 +28,7 @@ namespace DetectObject.Utils
             {
                 MessageBox.Show("it is not a admin oper");
             }
-            SetSavePath();
+            CommonFunc.SetSavePath();
         }
 
         public CameraHelper()
@@ -349,55 +349,6 @@ namespace DetectObject.Utils
             for (int i = 0; i < tempBuffer.Length; ++i)
             {
                 utf8Buffer[i] = tempBuffer[i];
-            }
-        }
-
-        public void SetSavePath()
-        {
-            String m_currentPath = Application.StartupPath;
-            string pictureSavePath = m_currentPath + "\\Pic\\";
-            string recordSavePath = m_currentPath + "\\Record\\";
-            string scannedPath = m_currentPath + "\\Scanned\\";
-            LocalSetting.setPath(pictureSavePath, recordSavePath, scannedPath);
-        }
-
-        //public void Dispose()
-        //{
-        //    GC.SuppressFinalize(this);
-        //}
-    }
-
-    public class LocalSetting
-    {
-        public static string m_strPicSavePath = null;
-        public static string m_strRecordSavePath = null;
-        public static string m_strScannedPath = null;
-        public static void setPath(string picturePath, string recordPath, string scannedPath)
-        {
-            try
-            {
-                if (!Directory.Exists(picturePath))
-                {
-                    Directory.CreateDirectory(picturePath);
-                }
-
-                if (!Directory.Exists(recordPath))
-                {
-                    Directory.CreateDirectory(recordPath);
-                }
-
-                if (!Directory.Exists(scannedPath))
-                {
-                    Directory.CreateDirectory(scannedPath);
-                }
-
-                m_strPicSavePath = picturePath;
-                m_strRecordSavePath = recordPath;
-                m_strScannedPath = scannedPath;
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("create path fail", "warning");
             }
         }
     }
