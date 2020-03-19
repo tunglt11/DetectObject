@@ -25,6 +25,7 @@ namespace DetectObject
         public List<DiVat> DSDiVat;
         public BindingSource bsDiVat = new BindingSource();
         bool IsScan = false;
+        double ViTriLoiMoiNhat = 0;
         public frmMain()
         {
             InitializeComponent();
@@ -101,13 +102,19 @@ namespace DetectObject
                                 if (!m.IsEmpty)
                                 {
                                     var inputImage = m.ToImage<Bgr, byte>();
-                                    if (detecter.DetectObject(inputImage))
+                                    int heightOfObject;
+                                    if (detecter.DetectObject(inputImage, out heightOfObject))
                                     {
                                         var thoiDiemLoi = thamSo.ThoiGianBatDauLuuVideo.AddSeconds(currentFrame * OneFPS / 1000);
-                                        var viTriLoi = (thoiDiemLoi - thamSo.ThoiGianBatDauCuon).TotalSeconds * Utilities.VanToc;
-                                        DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = thamSo.TenCuon, Image = CommonFunc.ConvertImageToByte(inputImage.Bitmap) });
-                                        this.Invoke(new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); }));
-                                        pictureBox1.Image = inputImage.Bitmap;
+                                        var viTriDiVatTrenAnh = Utilities.DoCao1KhungHinhThucTe * heightOfObject / inputImage.Height;
+                                        var viTriLoi = (thoiDiemLoi - thamSo.ThoiGianBatDauCuon).TotalSeconds * Utilities.VanToc + viTriDiVatTrenAnh;
+                                        if (viTriLoi - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
+                                        {
+                                            ViTriLoiMoiNhat = viTriLoi;
+                                            DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = thamSo.TenCuon, Image = CommonFunc.ResizeImage(CommonFunc.ConvertImageToByte(inputImage.Bitmap), 500) });
+                                            this.Invoke(new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); }));
+                                            pictureBox1.Image = inputImage.Bitmap;
+                                        }
                                     }
                                     else
                                     {
@@ -156,6 +163,7 @@ namespace DetectObject
             if (CommonFunc.IsNumber(txtVanToc.Text))
             {
                 IsScan = true;
+                ViTriLoiMoiNhat = 0;
                 Utilities.VanToc = Convert.ToDouble(txtVanToc.Text);
                 //Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
                 //Utilities.TenCuon = (TenCuon + 1).ToString();

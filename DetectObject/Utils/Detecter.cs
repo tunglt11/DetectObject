@@ -15,9 +15,10 @@ namespace DetectObject.Utils
 {
     public class Detecter
     {
-        public bool DetectObject(Image<Bgr, byte> imgInput)
+        public bool DetectObject(Image<Bgr, byte> imgInput, out int heighOfObject)
         {
             var sobel = imgInput.Convert<Gray, byte>().Canny(150, 250);
+            heighOfObject = 0;
             Mat SE = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Cross, new Size(50, 1), new Point(-1, -1));
             sobel = sobel.MorphologyEx(Emgu.CV.CvEnum.MorphOp.Close, SE, new Point(-1, -1), 2, Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(255));
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
@@ -50,6 +51,7 @@ namespace DetectObject.Utils
 
             if (list.Count > 0)
             {
+                heighOfObject = minY;
                 totalRec.X = minX;
                 totalRec.Y = minY;
                 totalRec.Width = maxX - minX;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,23 @@ namespace DetectObject.Utils
         public static Bitmap ConvertByteToImage(byte[] bytes)
         {
            return (Bitmap)((new ImageConverter()).ConvertFrom(bytes));
+        }
+
+        public static byte[] ResizeImage(byte[] data, int width)
+        {
+            using (var stream = new MemoryStream(data))
+            {
+                var image = Image.FromStream(stream);
+
+                var height = (width * image.Height) / image.Width;
+                var thumbnail = image.GetThumbnailImage(width, height, null, IntPtr.Zero);
+
+                using (var thumbnailStream = new MemoryStream())
+                {
+                    thumbnail.Save(thumbnailStream, ImageFormat.Jpeg);
+                    return thumbnailStream.ToArray();
+                }
+            }
         }
 
         public static string FormatFileNameVideo()
