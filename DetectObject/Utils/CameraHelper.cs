@@ -168,7 +168,7 @@ namespace DetectObject.Utils
         private DeviceInfo GetDeviceInfo(string cameraName)
         {
             DeviceInfo deviceInfo = null;
-            var config = ConfigurationSettings.AppSettings.Get(cameraName);
+            var config = ConfigurationManager.AppSettings[cameraName];
             if (!string.IsNullOrEmpty(config))
             {
                 config = config.Replace("rtsp://", "");
@@ -180,7 +180,8 @@ namespace DetectObject.Utils
                 deviceInfo.m_userName = nameInfor[0];
                 deviceInfo.m_password = nameInfor[1];
                 deviceInfo.m_ip = ipInfor[0];
-                deviceInfo.m_port = Convert.ToInt16(ipInfor[1]);
+                //deviceInfo.m_port = Convert.ToInt16(ipInfor[1]);
+                deviceInfo.m_port = 80;
                 deviceInfo.m_cameraName = cameraName;
                 deviceInfo.m_eDeviceType = NETDEMO.NETDEMO_DEVICE_TYPE_E.NETDEMO_DEVICE_IPC_OR_NVR;
             }
@@ -360,10 +361,10 @@ namespace DetectObject.Utils
             LocalSetting.setPath(pictureSavePath, recordSavePath, scannedPath);
         }
 
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-        }
+        //public void Dispose()
+        //{
+        //    GC.SuppressFinalize(this);
+        //}
     }
 
     public class LocalSetting

@@ -34,6 +34,7 @@ namespace DetectObject.Utils
                 }
             }
 
+            contours.Dispose();
             Rectangle totalRec = new Rectangle();
             int minX = int.MaxValue;
             int maxX = 0;
@@ -57,7 +58,7 @@ namespace DetectObject.Utils
                 CvInvoke.Rectangle(imgInput, totalRec, new MCvScalar(0, 0, 255), 2);
                 String m_currentPath = Application.StartupPath;
                 string pictureSavePath = m_currentPath + "\\Pic\\";
-                imgInput.Save(pictureSavePath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".jpg");
+                //imgInput.Save(pictureSavePath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".jpg");
             }
 
             return list.Count > 0;

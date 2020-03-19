@@ -6,6 +6,7 @@ using GeneralDef;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -25,6 +26,7 @@ namespace DetectObject
         public List<DiVat> DSDiVat;
         public BindingSource bsDiVat = new BindingSource();
         bool IsScan = false;
+        VideoCapture videoCapture = null;
         public frmMain()
         {
             InitializeComponent();
@@ -40,21 +42,21 @@ namespace DetectObject
         private void frmMain_Shown(object sender, EventArgs e)
         {
             #region Setup camera
-            //Parallel.Invoke(() => { CameraHelper.SetupCamera(Constant.Camera); });
-            //if (!CameraHelper.IsSetupBefore())
-            //{
-            //    //Chơ setup camera
-            //    Thread.Sleep(2000);
-            //}
-            //if (CameraHelper.FindDeviceInfo(Constant.Camera) != null)
-            //{
-            //    CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
-            //    CameraHelper.StartRealPlay(Constant.Camera);
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Không thể kết nối camera.", "Lỗi kết nối camera", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+            Parallel.Invoke(() => { CameraHelper.SetupCamera(Constant.Camera); });
+            if (!CameraHelper.IsSetupBefore())
+            {
+                //Chơ setup camera
+                Thread.Sleep(2000);
+            }
+            if (CameraHelper.FindDeviceInfo(Constant.Camera) != null)
+            {
+                CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
+                CameraHelper.StartRealPlay(Constant.Camera);
+            }
+            else
+            {
+                MessageBox.Show("Không thể kết nối camera.", "Lỗi kết nối camera", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             #endregion
 
             bsDiVat.DataSource = DSDiVat;
@@ -63,77 +65,48 @@ namespace DetectObject
 
         private async void ScanObject()
         {
-            while (true)
+            Action ResetUI = new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); });
+            Detecter detecter = new Detecter();
+            try
             {
-                string[] fileArray = Directory.GetFiles(LocalSetting.m_strRecordSavePath, "*.mp4");
-                if (fileArray.Length == 0 || !IsScan)
+                Mat m = new Mat();
+                while (true)
                 {
-                    Thread.Sleep(7000);
-                }
-                else
-                {
-                    Detecter detecter = new Detecter();
-                    for (int i = 0; i < fileArray.Length; i++)
+                    if (IsScan && videoCapture != null)
                     {
-                        var capture = new VideoCapture(fileArray[i]);
-                        try
+                        videoCapture.Read(m);
+                        if (!m.IsEmpty)
                         {
-                            var thamSo = CommonFunc.GetThamSoTuFileName(fileArray[i]);
-                            var totalFrames = capture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameCount);
-                            double currentFrame = 0;
-                            double fps = capture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.Fps);
-                            double nextFrames = fps / 2;
-                            double OneFPS = 1000 / fps;
-                            while (currentFrame <= totalFrames)
+                            var inputImage = m.ToImage<Bgr, byte>();
+                            if (detecter.DetectObject(inputImage))
                             {
-                                capture.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames, currentFrame);
-                                if (currentFrame > totalFrames)
-                                {
-                                    currentFrame = totalFrames;
-                                }
-                                else
-                                {
-                                    currentFrame += nextFrames;
-                                }
-
-                                Mat m = new Mat();
-                                capture.Read(m);
-                                if (!m.IsEmpty)
-                                {
-                                    var inputImage = m.ToImage<Bgr, byte>();
-                                    if (detecter.DetectObject(inputImage))
-                                    {
-                                        var thoiDiemLoi = thamSo.ThoiGianBatDauLuuVideo.AddSeconds(currentFrame * OneFPS / 1000);
-                                        var viTriLoi = (thoiDiemLoi - thamSo.ThoiGianBatDauCuon).TotalSeconds * Utilities.VanToc;
-                                        DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = thamSo.TenCuon, Image = CommonFunc.ConvertImageToByte(inputImage.Bitmap) });
-                                        this.Invoke(new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); }));
-                                        pictureBox1.Image = inputImage.Bitmap;
-                                    }
-                                    else
-                                    {
-                                        inputImage.Dispose();
-                                    }
-
-                                    await Task.Delay(100);
-                                }
-                                else
-                                {
-                                    break;
-                                }
+                                var thoiDiemLoi = DateTime.Now;
+                                var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc;
+                                DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, Image = null });
+                                this.Invoke(ResetUI);
+                                pictureBox1.Image = inputImage.Bitmap;
+                            }
+                            else
+                            {
+                                inputImage.Dispose();
                             }
 
-                            capture.Dispose();
-                            //chuyển những file video đã được scan sang thư mục scanned
-                            string fileName = Path.GetFileName(fileArray[i]);
-                            File.Copy(fileArray[i], LocalSetting.m_strScannedPath + fileName);
-                            File.Delete(fileArray[i]);
+                            await Task.Delay(200);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            throw ex;
+                            break;
                         }
                     }
+                    else
+                    {
+                        Thread.Sleep(500);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 
@@ -146,9 +119,11 @@ namespace DetectObject
         private void btnStop_Click(object sender, EventArgs e)
         {
             IsScan = false;
-            CameraHelper.StopRecord(Constant.Camera);
-            timer1.Enabled = false;
-            timer1.Stop();
+            videoCapture.Dispose();
+            videoCapture = null;
+            //CameraHelper.StopRecord(Constant.Camera);
+            //timer1.Enabled = false;
+            //timer1.Stop();
         }
 
         private void btnSangCuon_Click(object sender, EventArgs e)
@@ -156,9 +131,10 @@ namespace DetectObject
             if (CommonFunc.IsNumber(txtVanToc.Text))
             {
                 IsScan = true;
+                videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera]);
                 Utilities.VanToc = Convert.ToDouble(txtVanToc.Text);
-                //Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
-                //Utilities.TenCuon = (TenCuon + 1).ToString();
+                Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
+                Utilities.TenCuon = "A".ToString();
                 //timer1.Enabled = true;
                 //timer1.Start();
                 //TaoVideo();
