@@ -3,6 +3,7 @@ using DetectObject.Utils;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using GeneralDef;
+using log4net;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,9 +22,7 @@ namespace DetectObject
 {
     public partial class frmMain : Form
     {
-        public CameraHelper CameraHelper;
-        //List<PlayPanel> PlayPanels = new List<PlayPanel>();
-        //List<DeviceInfo> DeviceInfos = new List<DeviceInfo>();
+        private static readonly ILog log = LogManager.GetLogger(typeof(frmMain));
         public List<DiVat> DSDiVat;
         public BindingSource bsDiVat = new BindingSource();
         bool IsScan = false;
@@ -33,7 +32,7 @@ namespace DetectObject
         public frmMain()
         {
             InitializeComponent();
-            //CameraHelper = new CameraHelper(PlayPanels, DeviceInfos);
+            DSDiVat = new List<DiVat>();
             BindingData();
             CommonFunc.SetSavePath();
         }
@@ -41,26 +40,12 @@ namespace DetectObject
         private void frmMain_Shown(object sender, EventArgs e)
         {
             #region Setup camera
-            //Parallel.Invoke(() => { CameraHelper.SetupCamera(Constant.Camera); });
-            //if (!CameraHelper.IsSetupBefore())
-            //{
-            //    //Chơ setup camera
-            //    Thread.Sleep(2000);
-            //}
-            //if (CameraHelper.FindDeviceInfo(Constant.Camera) != null)
-            //{
-            //    CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
-            //    CameraHelper.StartRealPlay(Constant.Camera);
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Không thể kết nối camera.", "Lỗi kết nối camera", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
             pictureBoxCamera = new PictureBox();
             pictureBoxCamera.Name = "camera";
             pictureBoxCamera.Dock = DockStyle.Fill;
             pictureBoxCamera.SizeMode = PictureBoxSizeMode.StretchImage;
             tlpCamera.Controls.Add(pictureBoxCamera);
+            AnHienTimKiem(true);
             #endregion
         }
 
@@ -72,7 +57,7 @@ namespace DetectObject
             {
                 Mat m = new Mat();
                 videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera]);
-                if (videoCapture != null)
+                if (videoCapture.IsOpened)
                 {
                     while (true)
                     {
@@ -82,14 +67,23 @@ namespace DetectObject
                         if (IsScan)
                         {
                             int heightOfObject;
-                            if (detecter.DetectObject(inputImage, out heightOfObject))
+                            string savedImagePath;
+                            if (detecter.DetectObject(inputImage, out heightOfObject, out savedImagePath))
                             {
                                 var thoiDiemLoi = DateTime.Now;
                                 var viTriDiVatTrenAnh = Utilities.DoCao1KhungHinhThucTe * heightOfObject / inputImage.Height;
                                 var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc + viTriDiVatTrenAnh;
                                 if (viTriLoi - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
                                 {
-                                    DSDiVat.Add(new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, Image = CommonFunc.ResizeImage(CommonFunc.ConvertImageToByte(inputImage.Bitmap), 360) });
+                                    var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, ImagePath = savedImagePath };
+                                    DSDiVat.Add(diVat);
+                                    var savedFilePath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + ".txt";
+                                    string content = JsonConvert.SerializeObject(diVat);
+                                    if (File.Exists(savedFilePath))
+                                    {
+                                        content = "," + content;
+                                    }
+                                    File.AppendAllText(savedFilePath, content);
                                     this.Invoke(ResetUI);
                                     pictureBox1.Image = inputImage.Bitmap;
                                 }
@@ -125,13 +119,8 @@ namespace DetectObject
             IsScan = false;
             btnSangCuon.Enabled = true;
             btnStop.Enabled = false;
-            var json = JsonConvert.SerializeObject(DSDiVat);
-            File.WriteAllText(LocalSetting.m_strDataPath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".txt", json, Encoding.UTF8);
-            //videoCapture.Dispose();
-            //videoCapture = null;
-            //CameraHelper.StopRecord(Constant.Camera);
-            //timer1.Enabled = false;
-            //timer1.Stop();
+            btnGopLoi.Enabled = true;
+            AnHienTimKiem(true);
         }
 
         private void btnSangCuon_Click(object sender, EventArgs e)
@@ -142,13 +131,14 @@ namespace DetectObject
                 ViTriLoiMoiNhat = 0;
                 btnSangCuon.Enabled = false;
                 btnStop.Enabled = true;
+                btnGopLoi.Enabled = false;
                 Utilities.VanToc = Convert.ToDouble(txtVanToc.Text);
                 Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
-                Utilities.TenCuon = "A".ToString();
+                Utilities.TenCuon = LayTenCuonHienTai();
+                Utilities.ThuMucLuuLoi = TaoThuMucLuuLoi();
+                DSDiVat = new List<DiVat>();
                 BindingData();
-                //timer1.Enabled = true;
-                //timer1.Start();
-                //TaoVideo();
+                AnHienTimKiem(false);
             }
             else
             {
@@ -156,18 +146,54 @@ namespace DetectObject
             }
         }
 
-        private void TaoVideo()
+        private string LayTenCuonHienTai()
         {
-            CameraHelper.StopRecord(Constant.Camera);
-            CameraHelper.StopRealPlay(Constant.Camera);
-            CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
-            CameraHelper.StartRealPlay(Constant.Camera);
-            CameraHelper.StartRecord(Constant.Camera);
+            int cuon = 1;
+            if (File.Exists(LocalSetting.m_strDataPath + "TenCuon.txt"))
+            {
+                var name = File.ReadLines(LocalSetting.m_strDataPath + "TenCuon.txt").ToList();
+                cuon = Convert.ToInt32(name[0]) + 1;
+            }
+            File.WriteAllText(LocalSetting.m_strDataPath + "TenCuon.txt", cuon.ToString());
+
+            return "C" + cuon;
         }
+
+        private string TaoThuMucLuuLoi()
+        {
+            string tenThucMuc = DateTime.Now.ToString("MMddyyyy");
+            if (!Directory.Exists(LocalSetting.m_strDataPath + tenThucMuc))
+            {
+                Directory.CreateDirectory(LocalSetting.m_strDataPath + tenThucMuc);
+            }
+
+            return tenThucMuc;
+        }
+
+        private void AnHienTimKiem(bool hienThi)
+        {
+            lbNgay.Visible = hienThi;
+            lbCuon.Visible = hienThi;
+            dtPickerNgayTimKiem.Visible = hienThi;
+            cbCuon.Visible = hienThi;
+            btnTimKiem.Visible = hienThi;
+            if (hienThi)
+            {
+                TimKiem();
+            }
+        }
+        //private void TaoVideo()
+        //{
+        //    CameraHelper.StopRecord(Constant.Camera);
+        //    CameraHelper.StopRealPlay(Constant.Camera);
+        //    CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
+        //    CameraHelper.StartRealPlay(Constant.Camera);
+        //    CameraHelper.StartRecord(Constant.Camera);
+        //}
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            TaoVideo();
+            //TaoVideo();
         }
 
         private void btnXemAnh_Click(object sender, EventArgs e)
@@ -243,7 +269,18 @@ namespace DetectObject
                     return;
                 }
                 maxIndex -= 1;
-                dsChonDiVat.Add(DSDiVat.FirstOrDefault(d => d.Loi == (int)row.Cells["Loi"].Value));
+                dsChonDiVat.Add(DSDiVat.FirstOrDefault(d => d.Loi == (int)row.Cells["Loi"].Value && d.Cuon == (string)row.Cells["Cuon"].Value));
+            }
+
+            for (int i= 0; i < dsChonDiVat.Count; i++)
+            {
+                if (i == 0)
+                    continue;
+                if (dsChonDiVat[i].Cuon != dsChonDiVat[i - 1].Cuon)
+                {
+                    MessageBox.Show("Không thể gộp ảnh từ cuộn khác nhau", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
 
             var frmGopAnh = new frmGopAnhLoi(this, dsChonDiVat);
@@ -263,9 +300,87 @@ namespace DetectObject
 
         private void BindingData()
         {
-            DSDiVat = new List<DiVat>();
             bsDiVat.DataSource = DSDiVat;
             dgvDSLoi.DataSource = bsDiVat;
+        }
+
+        private void dtPickerNgayTimKiem_ValueChanged(object sender, EventArgs e)
+        {
+            TimKiem();
+        }
+
+        private void TimKiem()
+        {
+            var selectedDate = LocalSetting.m_strDataPath + dtPickerNgayTimKiem.Value.ToString("MMddyyyy");
+            var directories = Directory.GetDirectories(LocalSetting.m_strDataPath);
+            var dsCuon = new List<string>();
+            if (directories != null)
+            {
+                for (int i = 0; i < directories.Length; i++)
+                {
+                    if (directories[i] == selectedDate)
+                    {
+                        var files = Directory.GetFiles(directories[i]);
+                        for (int j = 0; j < files.Length; j++)
+                        {
+                            dsCuon.Add(Path.GetFileName(files[j]).Replace(".txt", ""));
+                        }
+                        break;
+                    }
+                }
+            }
+
+            cbCuon.DataSource = dsCuon;
+            cbCuon.Update();
+            cbCuon.ResetText();
+        }
+
+        private void btnTimKiem_Click(object sender, EventArgs e)
+        {
+            var selectedDate = LocalSetting.m_strDataPath + dtPickerNgayTimKiem.Value.ToString("MMddyyyy");
+            var directories = Directory.GetDirectories(LocalSetting.m_strDataPath);
+            bool isFound = false;
+            DSDiVat = new List<DiVat>();
+            if (directories != null)
+            {
+                for (int i = 0; i < directories.Length; i++)
+                {
+                    if (directories[i] == selectedDate)
+                    {
+                        var files = Directory.GetFiles(directories[i]);
+                        for (int j = 0; j < files.Length; j++)
+                        {
+                            if (string.IsNullOrWhiteSpace(cbCuon.Text))
+                            {
+                                var json = "[" + File.ReadAllText(files[j]) + "]";
+                                DSDiVat.AddRange(JsonConvert.DeserializeObject<List<DiVat>>(json, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+                                isFound = true;
+                            }
+                            else
+                            {
+                                if (Path.GetFileName(files[j].Replace(".txt", "")) == cbCuon.Text)
+                                {
+                                    Utilities.TenCuon = cbCuon.Text;
+                                    Utilities.ThuMucLuuLoi = dtPickerNgayTimKiem.Value.ToString("MMddyyyy");
+                                    var json = "[" + File.ReadAllText(files[j]) + "]";
+                                    if (!string.IsNullOrWhiteSpace(json))
+                                    {
+                                        DSDiVat = JsonConvert.DeserializeObject<List<DiVat>>(json, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                                        BindingData();
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            BindingData();
+            if (!isFound)
+            {
+                MessageBox.Show("Không tìm thấy kết quả nào.", "Thông tin", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }

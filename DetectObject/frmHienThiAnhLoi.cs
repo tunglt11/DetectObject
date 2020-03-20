@@ -26,7 +26,7 @@ namespace DetectObject
             lbCuon.Text = _DiVat.Cuon;
             lbThoiGian.Text = _DiVat.ThoiGianLoi.ToString();
             lbViTri.Text = _DiVat.ViTriLoi + " m";
-            pictureBox1.Image = CommonFunc.ConvertByteToImage(_DiVat.Image);
+            pictureBox1.Image = Image.FromFile(_DiVat.ImagePath);
         }
     }
 }

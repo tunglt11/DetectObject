@@ -56,6 +56,11 @@
             this.Image = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.btnBatdau = new System.Windows.Forms.Button();
+            this.dtPickerNgayTimKiem = new System.Windows.Forms.DateTimePicker();
+            this.lbNgay = new System.Windows.Forms.Label();
+            this.lbCuon = new System.Windows.Forms.Label();
+            this.cbCuon = new System.Windows.Forms.ComboBox();
+            this.btnTimKiem = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -220,12 +225,17 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.btnTimKiem);
+            this.groupBox4.Controls.Add(this.cbCuon);
+            this.groupBox4.Controls.Add(this.lbCuon);
+            this.groupBox4.Controls.Add(this.lbNgay);
+            this.groupBox4.Controls.Add(this.dtPickerNgayTimKiem);
             this.groupBox4.Controls.Add(this.btnGopLoi);
             this.groupBox4.Controls.Add(this.btnXemAnh);
             this.groupBox4.Controls.Add(this.panel1);
-            this.groupBox4.Location = new System.Drawing.Point(24, 411);
+            this.groupBox4.Location = new System.Drawing.Point(24, 408);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(878, 252);
+            this.groupBox4.Size = new System.Drawing.Size(878, 258);
             this.groupBox4.TabIndex = 5;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Danh sách lỗi";
@@ -255,7 +265,7 @@
             this.panel1.Controls.Add(this.dgvDSLoi);
             this.panel1.Location = new System.Drawing.Point(0, 58);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(878, 188);
+            this.panel1.Size = new System.Drawing.Size(878, 194);
             this.panel1.TabIndex = 0;
             // 
             // dgvDSLoi
@@ -275,7 +285,7 @@
             this.dgvDSLoi.ReadOnly = true;
             this.dgvDSLoi.RowHeadersWidth = 51;
             this.dgvDSLoi.RowTemplate.Height = 24;
-            this.dgvDSLoi.Size = new System.Drawing.Size(878, 188);
+            this.dgvDSLoi.Size = new System.Drawing.Size(878, 194);
             this.dgvDSLoi.TabIndex = 0;
             this.dgvDSLoi.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDSLoi_CellClick);
             this.dgvDSLoi.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDSLoi_CellDoubleClick);
@@ -341,6 +351,53 @@
             this.btnBatdau.UseVisualStyleBackColor = true;
             this.btnBatdau.Click += new System.EventHandler(this.btnBatdau_Click);
             // 
+            // dtPickerNgayTimKiem
+            // 
+            this.dtPickerNgayTimKiem.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtPickerNgayTimKiem.Location = new System.Drawing.Point(60, 22);
+            this.dtPickerNgayTimKiem.MinDate = new System.DateTime(2020, 1, 1, 0, 0, 0, 0);
+            this.dtPickerNgayTimKiem.Name = "dtPickerNgayTimKiem";
+            this.dtPickerNgayTimKiem.Size = new System.Drawing.Size(158, 22);
+            this.dtPickerNgayTimKiem.TabIndex = 8;
+            this.dtPickerNgayTimKiem.TabStop = false;
+            this.dtPickerNgayTimKiem.ValueChanged += new System.EventHandler(this.dtPickerNgayTimKiem_ValueChanged);
+            // 
+            // lbNgay
+            // 
+            this.lbNgay.AutoSize = true;
+            this.lbNgay.Location = new System.Drawing.Point(13, 23);
+            this.lbNgay.Name = "lbNgay";
+            this.lbNgay.Size = new System.Drawing.Size(41, 17);
+            this.lbNgay.TabIndex = 6;
+            this.lbNgay.Text = "Ngày";
+            // 
+            // lbCuon
+            // 
+            this.lbCuon.AutoSize = true;
+            this.lbCuon.Location = new System.Drawing.Point(230, 24);
+            this.lbCuon.Name = "lbCuon";
+            this.lbCuon.Size = new System.Drawing.Size(41, 17);
+            this.lbCuon.TabIndex = 9;
+            this.lbCuon.Text = "Cuộn";
+            // 
+            // cbCuon
+            // 
+            this.cbCuon.FormattingEnabled = true;
+            this.cbCuon.Location = new System.Drawing.Point(272, 21);
+            this.cbCuon.Name = "cbCuon";
+            this.cbCuon.Size = new System.Drawing.Size(84, 24);
+            this.cbCuon.TabIndex = 10;
+            // 
+            // btnTimKiem
+            // 
+            this.btnTimKiem.Location = new System.Drawing.Point(376, 19);
+            this.btnTimKiem.Name = "btnTimKiem";
+            this.btnTimKiem.Size = new System.Drawing.Size(96, 29);
+            this.btnTimKiem.TabIndex = 11;
+            this.btnTimKiem.Text = "Tìm kiếm";
+            this.btnTimKiem.UseVisualStyleBackColor = true;
+            this.btnTimKiem.Click += new System.EventHandler(this.btnTimKiem_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -365,6 +422,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.tbMauGiay)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvDSLoi)).EndInit();
             this.ResumeLayout(false);
@@ -400,6 +458,11 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Cuon;
         private System.Windows.Forms.DataGridViewTextBoxColumn Image;
         private System.Windows.Forms.Button btnBatdau;
+        private System.Windows.Forms.Button btnTimKiem;
+        private System.Windows.Forms.ComboBox cbCuon;
+        private System.Windows.Forms.Label lbCuon;
+        private System.Windows.Forms.Label lbNgay;
+        private System.Windows.Forms.DateTimePicker dtPickerNgayTimKiem;
     }
 }
 

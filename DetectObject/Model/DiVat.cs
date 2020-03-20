@@ -14,6 +14,6 @@ namespace DetectObject.Model
         public double ViTriLoi { get; set; }
         public string Cuon { get; set; }
 
-        public byte[] Image { get; set; }
+        public string ImagePath { get; set; }
     }
 }

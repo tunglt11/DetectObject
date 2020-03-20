@@ -1,10 +1,12 @@
 ﻿using DetectObject.Model;
 using DetectObject.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +33,7 @@ namespace DetectObject
                 var pictureBox = new PictureBox();
                 pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
                 pictureBox.Dock = DockStyle.Fill;
-                pictureBox.Image = CommonFunc.ConvertByteToImage(diVat.Image);
+                pictureBox.Image = Image.FromFile(diVat.ImagePath);
                 pictureBox.Name = diVat.Loi.ToString();
                 pictureBox.Click += PictureBox_Click;
                 tableLayoutPanel1.Controls.Add(pictureBox);
@@ -51,6 +53,8 @@ namespace DetectObject
             {
                 _frmMain.DSDiVat[i].Loi = i + 1;
             }
+            var content = JsonConvert.SerializeObject(_frmMain.DSDiVat).Replace("[", "").Replace("]", "");
+            File.WriteAllText(LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + ".txt", content);
             _frmMain.bsDiVat.ResetBindings(false);
             _frmMain.DemLoi();
             this.Close();

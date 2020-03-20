@@ -77,7 +77,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.panel1);
             this.Name = "frmGopAnhLoi";
-            this.Text = "frmGopAnhLoi";
+            this.Text = "Gộp ảnh lỗi";
             this.Load += new System.EventHandler(this.frmGopAnhLoi_Load);
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);

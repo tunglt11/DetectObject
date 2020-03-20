@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,10 +16,11 @@ namespace DetectObject.Utils
 {
     public class Detecter
     {
-        public bool DetectObject(Image<Bgr, byte> imgInput, out int heighOfObject)
+        public bool DetectObject(Image<Bgr, byte> imgInput, out int heighOfObject, out string savedImagePath)
         {
             var sobel = imgInput.Convert<Gray, byte>().Canny(150, 250);
             heighOfObject = 0;
+            savedImagePath = string.Empty;
             Mat SE = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Cross, new Size(50, 1), new Point(-1, -1));
             sobel = sobel.MorphologyEx(Emgu.CV.CvEnum.MorphOp.Close, SE, new Point(-1, -1), 2, Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(255));
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
@@ -58,7 +60,13 @@ namespace DetectObject.Utils
                 totalRec.Width = maxX - minX;
                 totalRec.Height = maxY - minY;
                 CvInvoke.Rectangle(imgInput, totalRec, new MCvScalar(0, 0, 255), 2);
-                imgInput.Save(LocalSetting.m_strPicSavePath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".jpg");
+                var savedFolderPath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + "\\";
+                savedImagePath = savedFolderPath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".jpg";
+                if (!Directory.Exists(savedFolderPath))
+                {
+                    Directory.CreateDirectory(savedFolderPath);
+                }
+                imgInput.Save(savedImagePath);
             }
 
             return list.Count > 0;

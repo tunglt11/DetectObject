@@ -120,37 +120,30 @@ namespace DetectObject.Utils
         public static string m_strDataPath = null;
         public static void setPath(string picturePath, string recordPath, string scannedPath, string dataPath)
         {
-            try
+            if (!Directory.Exists(picturePath))
             {
-                if (!Directory.Exists(picturePath))
-                {
-                    Directory.CreateDirectory(picturePath);
-                }
-
-                if (!Directory.Exists(recordPath))
-                {
-                    Directory.CreateDirectory(recordPath);
-                }
-
-                if (!Directory.Exists(scannedPath))
-                {
-                    Directory.CreateDirectory(scannedPath);
-                }
-
-                if (!Directory.Exists(dataPath))
-                {
-                    Directory.CreateDirectory(dataPath);
-                }
-
-                m_strPicSavePath = picturePath;
-                m_strRecordSavePath = recordPath;
-                m_strScannedPath = scannedPath;
-                m_strDataPath = dataPath;
+                Directory.CreateDirectory(picturePath);
             }
-            catch (Exception)
+
+            if (!Directory.Exists(recordPath))
             {
-                MessageBox.Show("create path fail", "warning");
+                Directory.CreateDirectory(recordPath);
             }
+
+            if (!Directory.Exists(scannedPath))
+            {
+                Directory.CreateDirectory(scannedPath);
+            }
+
+            if (!Directory.Exists(dataPath))
+            {
+                Directory.CreateDirectory(dataPath);
+            }
+
+            m_strPicSavePath = picturePath;
+            m_strRecordSavePath = recordPath;
+            m_strScannedPath = scannedPath;
+            m_strDataPath = dataPath;
         }
     }
 }
