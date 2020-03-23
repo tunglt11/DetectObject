@@ -9,5 +9,6 @@ namespace DetectObject.Utils
     public class Constant
     {
         public const string Camera = "cam";
+        public const string ROI = "ROI";
     }
 }

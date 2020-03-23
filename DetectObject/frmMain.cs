@@ -29,12 +29,21 @@ namespace DetectObject
         VideoCapture videoCapture = null;
         double ViTriLoiMoiNhat = 0;
         PictureBox pictureBoxCamera;
+        Rectangle _ROI;
         public frmMain()
         {
             InitializeComponent();
             DSDiVat = new List<DiVat>();
             BindingData();
             CommonFunc.SetSavePath();
+            #region ROI
+            _ROI = new Rectangle();
+            var roi = ConfigurationManager.AppSettings[Constant.ROI].Split(',');
+            _ROI.X = Convert.ToInt32(roi[0]);
+            _ROI.Y = Convert.ToInt32(roi[1]);
+            _ROI.Width = Convert.ToInt32(roi[2]);
+            _ROI.Height = Convert.ToInt32(roi[3]);
+            #endregion
         }
 
         private void frmMain_Shown(object sender, EventArgs e)
@@ -52,7 +61,7 @@ namespace DetectObject
         private async void ScanObject()
         {
             Action ResetUI = new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); });
-            Detecter detecter = new Detecter();
+            var detecter = new Detecter();
             try
             {
                 Mat m = new Mat();
@@ -62,7 +71,10 @@ namespace DetectObject
                     while (true)
                     {
                         videoCapture.Read(m);
-                        var inputImage = m.ToImage<Bgr, byte>();
+                        var img = m.ToImage<Bgr, byte>();
+                        img.ROI = _ROI;
+                        Image<Bgr, byte> inputImage = img.CopyBlank();
+                        img.CopyTo(inputImage);
                         pictureBoxCamera.Image = inputImage.Bitmap;
                         if (IsScan)
                         {
@@ -237,6 +249,8 @@ namespace DetectObject
 
             int index = e.RowIndex;
             dgvDSLoi.Rows[index].Selected = true;
+            var diVat = DSDiVat.FirstOrDefault(d => d.Loi == Convert.ToInt32(dgvDSLoi.CurrentRow.Cells["Loi"].Value) && d.Cuon == (string)dgvDSLoi.CurrentRow.Cells["Cuon"].Value);
+            pictureBox1.Image = System.Drawing.Image.FromFile(diVat.ImagePath);
         }
 
         private void btnGopLoi_Click(object sender, EventArgs e)
