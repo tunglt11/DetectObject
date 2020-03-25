@@ -58,10 +58,9 @@ namespace DetectObject
             #endregion
         }
 
-        private async void ScanObject()
+        private void ScanObject()
         {
             Action ResetUI = new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); });
-            var detecter = new Detecter();
             try
             {
                 Mat m = new Mat();
@@ -78,35 +77,12 @@ namespace DetectObject
                         pictureBoxCamera.Image = inputImage.Bitmap;
                         if (IsScan)
                         {
-                            int heightOfObject;
-                            string savedImagePath;
-                            if (detecter.DetectObject(inputImage, out heightOfObject, out savedImagePath))
-                            {
-                                var thoiDiemLoi = DateTime.Now;
-                                var viTriDiVatTrenAnh = Utilities.DoCao1KhungHinhThucTe * heightOfObject / inputImage.Height;
-                                var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc + viTriDiVatTrenAnh;
-                                if (viTriLoi - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
-                                {
-                                    var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, ImagePath = savedImagePath };
-                                    DSDiVat.Add(diVat);
-                                    var savedFilePath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + ".txt";
-                                    string content = JsonConvert.SerializeObject(diVat);
-                                    if (File.Exists(savedFilePath))
-                                    {
-                                        content = "," + content;
-                                    }
-                                    File.AppendAllText(savedFilePath, content);
-                                    this.Invoke(ResetUI);
-                                    pictureBox1.Image = inputImage.Bitmap;
-                                }
-                            }
+                            Scan(inputImage, ResetUI);
                         }
-                        else
-                        {
-                            Thread.Sleep(500);
-                        }
-                        inputImage.Dispose();
-                        await Task.Delay(200);
+                        //else
+                        //{
+                        //    Thread.Sleep(500);
+                        //}
                     }
                 }
                 else
@@ -119,6 +95,37 @@ namespace DetectObject
                 throw ex;
             }
         }
+
+        private void Scan(Image<Bgr, byte> inputImage, Action ResetUI)
+        {
+            Task.Run(() => 
+            {
+                int heightOfObject;
+                string savedImagePath;
+                if (Detecter.DetectObject(inputImage, out heightOfObject, out savedImagePath))
+                {
+                    var thoiDiemLoi = DateTime.Now;
+                    var viTriDiVatTrenAnh = Utilities.DoCao1KhungHinhThucTe * heightOfObject / inputImage.Height;
+                    var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc + viTriDiVatTrenAnh;
+                    if (viTriLoi - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
+                    {
+                        var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, ImagePath = savedImagePath };
+                        DSDiVat.Add(diVat);
+                        var savedFilePath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + ".txt";
+                        string content = JsonConvert.SerializeObject(diVat);
+                        if (File.Exists(savedFilePath))
+                        {
+                            content = "," + content;
+                        }
+                        //File.AppendAllText(savedFilePath, content);
+                        this.Invoke(ResetUI);
+                        pictureBox1.Image = inputImage.Bitmap;
+                    }
+                }
+                inputImage.Dispose();
+            });
+        }
+       
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {

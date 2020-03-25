@@ -16,7 +16,7 @@ namespace DetectObject.Utils
 {
     public class Detecter
     {
-        public bool DetectObject(Image<Bgr, byte> imgInput, out int heighOfObject, out string savedImagePath)
+        public static bool DetectObject(Image<Bgr, byte> imgInput, out int heighOfObject, out string savedImagePath)
         {
             var sobel = imgInput.Convert<Gray, byte>().Canny(150, 250);
             heighOfObject = 0;
