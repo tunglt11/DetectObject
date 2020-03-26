@@ -45,6 +45,11 @@
             this.btnSangCuon = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.btnTimKiem = new System.Windows.Forms.Button();
+            this.cbCuon = new System.Windows.Forms.ComboBox();
+            this.lbCuon = new System.Windows.Forms.Label();
+            this.lbNgay = new System.Windows.Forms.Label();
+            this.dtPickerNgayTimKiem = new System.Windows.Forms.DateTimePicker();
             this.btnGopLoi = new System.Windows.Forms.Button();
             this.btnXemAnh = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -56,11 +61,7 @@
             this.Image = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.btnBatdau = new System.Windows.Forms.Button();
-            this.dtPickerNgayTimKiem = new System.Windows.Forms.DateTimePicker();
-            this.lbNgay = new System.Windows.Forms.Label();
-            this.lbCuon = new System.Windows.Forms.Label();
-            this.cbCuon = new System.Windows.Forms.ComboBox();
-            this.btnTimKiem = new System.Windows.Forms.Button();
+            this.btnTai = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -225,6 +226,7 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.btnTai);
             this.groupBox4.Controls.Add(this.btnTimKiem);
             this.groupBox4.Controls.Add(this.cbCuon);
             this.groupBox4.Controls.Add(this.lbCuon);
@@ -240,6 +242,53 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Danh sách lỗi";
             // 
+            // btnTimKiem
+            // 
+            this.btnTimKiem.Location = new System.Drawing.Point(376, 19);
+            this.btnTimKiem.Name = "btnTimKiem";
+            this.btnTimKiem.Size = new System.Drawing.Size(96, 29);
+            this.btnTimKiem.TabIndex = 11;
+            this.btnTimKiem.Text = "Tìm kiếm";
+            this.btnTimKiem.UseVisualStyleBackColor = true;
+            this.btnTimKiem.Click += new System.EventHandler(this.btnTimKiem_Click);
+            // 
+            // cbCuon
+            // 
+            this.cbCuon.FormattingEnabled = true;
+            this.cbCuon.Location = new System.Drawing.Point(272, 21);
+            this.cbCuon.Name = "cbCuon";
+            this.cbCuon.Size = new System.Drawing.Size(84, 24);
+            this.cbCuon.TabIndex = 10;
+            // 
+            // lbCuon
+            // 
+            this.lbCuon.AutoSize = true;
+            this.lbCuon.Location = new System.Drawing.Point(230, 24);
+            this.lbCuon.Name = "lbCuon";
+            this.lbCuon.Size = new System.Drawing.Size(41, 17);
+            this.lbCuon.TabIndex = 9;
+            this.lbCuon.Text = "Cuộn";
+            // 
+            // lbNgay
+            // 
+            this.lbNgay.AutoSize = true;
+            this.lbNgay.Location = new System.Drawing.Point(13, 23);
+            this.lbNgay.Name = "lbNgay";
+            this.lbNgay.Size = new System.Drawing.Size(41, 17);
+            this.lbNgay.TabIndex = 6;
+            this.lbNgay.Text = "Ngày";
+            // 
+            // dtPickerNgayTimKiem
+            // 
+            this.dtPickerNgayTimKiem.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtPickerNgayTimKiem.Location = new System.Drawing.Point(60, 22);
+            this.dtPickerNgayTimKiem.MinDate = new System.DateTime(2020, 1, 1, 0, 0, 0, 0);
+            this.dtPickerNgayTimKiem.Name = "dtPickerNgayTimKiem";
+            this.dtPickerNgayTimKiem.Size = new System.Drawing.Size(158, 22);
+            this.dtPickerNgayTimKiem.TabIndex = 8;
+            this.dtPickerNgayTimKiem.TabStop = false;
+            this.dtPickerNgayTimKiem.ValueChanged += new System.EventHandler(this.dtPickerNgayTimKiem_ValueChanged);
+            // 
             // btnGopLoi
             // 
             this.btnGopLoi.Location = new System.Drawing.Point(774, 19);
@@ -252,7 +301,7 @@
             // 
             // btnXemAnh
             // 
-            this.btnXemAnh.Location = new System.Drawing.Point(668, 19);
+            this.btnXemAnh.Location = new System.Drawing.Point(670, 19);
             this.btnXemAnh.Name = "btnXemAnh";
             this.btnXemAnh.Size = new System.Drawing.Size(96, 29);
             this.btnXemAnh.TabIndex = 6;
@@ -351,52 +400,15 @@
             this.btnBatdau.UseVisualStyleBackColor = true;
             this.btnBatdau.Click += new System.EventHandler(this.btnBatdau_Click);
             // 
-            // dtPickerNgayTimKiem
+            // btnTai
             // 
-            this.dtPickerNgayTimKiem.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtPickerNgayTimKiem.Location = new System.Drawing.Point(60, 22);
-            this.dtPickerNgayTimKiem.MinDate = new System.DateTime(2020, 1, 1, 0, 0, 0, 0);
-            this.dtPickerNgayTimKiem.Name = "dtPickerNgayTimKiem";
-            this.dtPickerNgayTimKiem.Size = new System.Drawing.Size(158, 22);
-            this.dtPickerNgayTimKiem.TabIndex = 8;
-            this.dtPickerNgayTimKiem.TabStop = false;
-            this.dtPickerNgayTimKiem.ValueChanged += new System.EventHandler(this.dtPickerNgayTimKiem_ValueChanged);
-            // 
-            // lbNgay
-            // 
-            this.lbNgay.AutoSize = true;
-            this.lbNgay.Location = new System.Drawing.Point(13, 23);
-            this.lbNgay.Name = "lbNgay";
-            this.lbNgay.Size = new System.Drawing.Size(41, 17);
-            this.lbNgay.TabIndex = 6;
-            this.lbNgay.Text = "Ngày";
-            // 
-            // lbCuon
-            // 
-            this.lbCuon.AutoSize = true;
-            this.lbCuon.Location = new System.Drawing.Point(230, 24);
-            this.lbCuon.Name = "lbCuon";
-            this.lbCuon.Size = new System.Drawing.Size(41, 17);
-            this.lbCuon.TabIndex = 9;
-            this.lbCuon.Text = "Cuộn";
-            // 
-            // cbCuon
-            // 
-            this.cbCuon.FormattingEnabled = true;
-            this.cbCuon.Location = new System.Drawing.Point(272, 21);
-            this.cbCuon.Name = "cbCuon";
-            this.cbCuon.Size = new System.Drawing.Size(84, 24);
-            this.cbCuon.TabIndex = 10;
-            // 
-            // btnTimKiem
-            // 
-            this.btnTimKiem.Location = new System.Drawing.Point(376, 19);
-            this.btnTimKiem.Name = "btnTimKiem";
-            this.btnTimKiem.Size = new System.Drawing.Size(96, 29);
-            this.btnTimKiem.TabIndex = 11;
-            this.btnTimKiem.Text = "Tìm kiếm";
-            this.btnTimKiem.UseVisualStyleBackColor = true;
-            this.btnTimKiem.Click += new System.EventHandler(this.btnTimKiem_Click);
+            this.btnTai.Location = new System.Drawing.Point(566, 19);
+            this.btnTai.Name = "btnTai";
+            this.btnTai.Size = new System.Drawing.Size(96, 29);
+            this.btnTai.TabIndex = 12;
+            this.btnTai.Text = "Tải";
+            this.btnTai.UseVisualStyleBackColor = true;
+            this.btnTai.Click += new System.EventHandler(this.btnTai_Click);
             // 
             // frmMain
             // 
@@ -463,6 +475,7 @@
         private System.Windows.Forms.Label lbCuon;
         private System.Windows.Forms.Label lbNgay;
         private System.Windows.Forms.DateTimePicker dtPickerNgayTimKiem;
+        private System.Windows.Forms.Button btnTai;
     }
 }
 

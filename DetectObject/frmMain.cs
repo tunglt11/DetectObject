@@ -60,39 +60,43 @@ namespace DetectObject
 
         private void ScanObject()
         {
-            Action ResetUI = new Action(() => { bsDiVat.ResetBindings(false); DemLoi(); });
+            Action ResetUI = new Action(() => { /*bsDiVat.ResetBindings(true);*/ DemLoi(); });
             try
             {
                 Mat m = new Mat();
-                videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera]);
+                videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera], VideoCapture.API.Ffmpeg);
                 if (videoCapture.IsOpened)
                 {
                     while (true)
                     {
                         videoCapture.Read(m);
-                        var img = m.ToImage<Bgr, byte>();
-                        img.ROI = _ROI;
-                        Image<Bgr, byte> inputImage = img.CopyBlank();
-                        img.CopyTo(inputImage);
-                        pictureBoxCamera.Image = inputImage.Bitmap;
-                        if (IsScan)
+                        if (!m.IsEmpty)
                         {
-                            Scan(inputImage, ResetUI);
+                            var img = m.ToImage<Bgr, byte>();
+                            img.ROI = _ROI;
+                            Image<Bgr, byte> inputImage = img.CopyBlank();
+                            img.CopyTo(inputImage);
+                            pictureBoxCamera.Image = inputImage.Bitmap;
+                            if (IsScan)
+                            {
+                                Scan(inputImage, ResetUI);
+                            }
+                            else
+                            {
+                                img.Dispose();
+                            }
+                            Task.Delay(200);
                         }
-                        //else
-                        //{
-                        //    Thread.Sleep(500);
-                        //}
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Không thể kết nối camera.", "Lỗi kết nối camera", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                StartCapture();
             }
         }
 
@@ -109,6 +113,7 @@ namespace DetectObject
                     var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc + viTriDiVatTrenAnh;
                     if (viTriLoi - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
                     {
+                        //pictureBox1.Image = inputImage.Bitmap;
                         var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, ImagePath = savedImagePath };
                         DSDiVat.Add(diVat);
                         var savedFilePath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + ".txt";
@@ -119,7 +124,7 @@ namespace DetectObject
                         }
                         //File.AppendAllText(savedFilePath, content);
                         this.Invoke(ResetUI);
-                        pictureBox1.Image = inputImage.Bitmap;
+                        
                     }
                 }
                 inputImage.Dispose();
@@ -313,10 +318,15 @@ namespace DetectObject
             btnSangCuon.Enabled = true;
             btnBatdau.Enabled = false;
             #region Scan Object
+            StartCapture();
+            #endregion
+        }
+
+        private void StartCapture()
+        {
             Thread thread = new Thread(new ThreadStart(ScanObject));
             thread.IsBackground = true;
             thread.Start();
-            #endregion
         }
 
         private void BindingData()
@@ -402,6 +412,11 @@ namespace DetectObject
             {
                 MessageBox.Show("Không tìm thấy kết quả nào.", "Thông tin", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+        }
+
+        private void btnTai_Click(object sender, EventArgs e)
+        {
+            bsDiVat.ResetBindings(false);
         }
     }
 }

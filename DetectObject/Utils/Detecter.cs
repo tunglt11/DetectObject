@@ -27,11 +27,11 @@ namespace DetectObject.Utils
             Mat m = new Mat();
             CvInvoke.FindContours(sobel, contours, m, Emgu.CV.CvEnum.RetrType.List, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
             List<Rectangle> list = new List<Rectangle>();
-            Image<Bgr, byte> imgout = imgInput.CopyBlank();
+            //Image<Bgr, byte> imgout = imgInput.CopyBlank();
             for (int i = 0; i < contours.Size; i++)
             {
                 Rectangle brect = CvInvoke.BoundingRectangle(contours[i]);
-                if (brect.Width > 10 && brect.Height > 10 && brect.Height < 100)
+                if (brect.Width > 10 && brect.Height > 10)
                 {
                     list.Add(brect);
                 }
