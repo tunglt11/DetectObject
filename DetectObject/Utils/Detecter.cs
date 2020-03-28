@@ -27,7 +27,6 @@ namespace DetectObject.Utils
             Mat m = new Mat();
             CvInvoke.FindContours(sobel, contours, m, Emgu.CV.CvEnum.RetrType.List, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
             List<Rectangle> list = new List<Rectangle>();
-            //Image<Bgr, byte> imgout = imgInput.CopyBlank();
             for (int i = 0; i < contours.Size; i++)
             {
                 Rectangle brect = CvInvoke.BoundingRectangle(contours[i]);
@@ -49,7 +48,6 @@ namespace DetectObject.Utils
                 if (r.X + r.Width > maxX) maxX = r.X + r.Width;
                 if (r.Y < minY) minY = r.Y;
                 if (r.Y + r.Height > maxY) maxY = r.Y + r.Height;
-                //CvInvoke.Rectangle(imgInput, r, new MCvScalar(0, 0, 255), 2);
             }
 
             if (list.Count > 0)
@@ -59,7 +57,7 @@ namespace DetectObject.Utils
                 totalRec.Y = minY;
                 totalRec.Width = maxX - minX;
                 totalRec.Height = maxY - minY;
-                CvInvoke.Rectangle(imgInput, totalRec, new MCvScalar(0, 0, 255), 2);
+                //CvInvoke.Rectangle(imgInput, totalRec, new MCvScalar(0, 0, 255), 2);
                 var savedFolderPath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + "\\";
                 savedImagePath = savedFolderPath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".jpg";
                 if (!Directory.Exists(savedFolderPath))

@@ -12,7 +12,7 @@ namespace DetectObject.Model
         public int Loi { get; set; }
         public DateTime ThoiGianLoi { get; set; }
         public double ViTriLoi { get; set; }
-        public string Cuon { get; set; }
+        public string TenCuon { get; set; }
 
         public string ImagePath { get; set; }
     }

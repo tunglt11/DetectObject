@@ -23,7 +23,7 @@ namespace DetectObject
 
         private void frmHienThiAnhLoi_Shown(object sender, EventArgs e)
         {
-            lbCuon.Text = _DiVat.Cuon;
+            lbCuon.Text = _DiVat.TenCuon;
             lbThoiGian.Text = _DiVat.ThoiGianLoi.ToString();
             lbViTri.Text = _DiVat.ViTriLoi + " m";
             pictureBox1.Image = Image.FromFile(_DiVat.ImagePath);

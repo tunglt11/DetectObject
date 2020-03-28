@@ -1,4 +1,5 @@
-﻿using DetectObject.Model;
+﻿using DetectObject.DataService;
+using DetectObject.Model;
 using DetectObject.Utils;
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -92,7 +93,7 @@ namespace DetectObject
             }
             catch (Exception ex)
             {
-                throw ex;
+                log.Error("Loi o chuc nang ScanObject", ex);
             }
             finally
             {
@@ -109,12 +110,11 @@ namespace DetectObject
                 if (Detecter.DetectObject(inputImage, out heightOfObject, out savedImagePath))
                 {
                     var thoiDiemLoi = DateTime.Now;
-                    var viTriDiVatTrenAnh = Utilities.DoCao1KhungHinhThucTe * heightOfObject / inputImage.Height;
-                    var viTriLoi = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc + viTriDiVatTrenAnh;
-                    if (viTriLoi - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
+                    var viTriLoiHienTai = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc;
+                    if (viTriLoiHienTai - ViTriLoiMoiNhat <= Utilities.DoCao1KhungHinhThucTe)
                     {
-                        //pictureBox1.Image = inputImage.Bitmap;
-                        var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoi, Cuon = Utilities.TenCuon, ImagePath = savedImagePath };
+                        ViTriLoiMoiNhat = viTriLoiHienTai;
+                        var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoiHienTai, TenCuon = Utilities.TenCuon, ImagePath = savedImagePath };
                         DSDiVat.Add(diVat);
                         var savedFilePath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + ".txt";
                         string content = JsonConvert.SerializeObject(diVat);
@@ -122,13 +122,30 @@ namespace DetectObject
                         {
                             content = "," + content;
                         }
-                        //File.AppendAllText(savedFilePath, content);
-                        this.Invoke(ResetUI);
                         
+                        //var diVatService = new DiVatService();
+                        //diVatService.LuuDiVat(diVat);
+
+                        this.Invoke(ResetUI);
+                        SaveContent(savedFilePath, content);
                     }
                 }
                 inputImage.Dispose();
             });
+        }
+
+        private void SaveContent(string savedFilePath, string content)
+        {
+            try
+            {
+                File.AppendAllText(savedFilePath, content);
+            }
+            catch(Exception ex)
+            {
+                log.Error("Loi luu noi dung", ex);
+                Task.Delay(1500);
+                SaveContent(savedFilePath, content);
+            }
         }
        
 
@@ -161,6 +178,8 @@ namespace DetectObject
                 Utilities.TenCuon = LayTenCuonHienTai();
                 Utilities.ThuMucLuuLoi = TaoThuMucLuuLoi();
                 DSDiVat = new List<DiVat>();
+                DemLoi();
+                pictureBox1.Image = null;
                 BindingData();
                 AnHienTimKiem(false);
             }
@@ -206,6 +225,7 @@ namespace DetectObject
                 TimKiem();
             }
         }
+
         //private void TaoVideo()
         //{
         //    CameraHelper.StopRecord(Constant.Camera);
@@ -261,7 +281,7 @@ namespace DetectObject
 
             int index = e.RowIndex;
             dgvDSLoi.Rows[index].Selected = true;
-            var diVat = DSDiVat.FirstOrDefault(d => d.Loi == Convert.ToInt32(dgvDSLoi.CurrentRow.Cells["Loi"].Value) && d.Cuon == (string)dgvDSLoi.CurrentRow.Cells["Cuon"].Value);
+            var diVat = DSDiVat.FirstOrDefault(d => d.Loi == Convert.ToInt32(dgvDSLoi.CurrentRow.Cells["Loi"].Value) && d.TenCuon == (string)dgvDSLoi.CurrentRow.Cells["TenCuon"].Value);
             pictureBox1.Image = System.Drawing.Image.FromFile(diVat.ImagePath);
         }
 
@@ -295,14 +315,14 @@ namespace DetectObject
                     return;
                 }
                 maxIndex -= 1;
-                dsChonDiVat.Add(DSDiVat.FirstOrDefault(d => d.Loi == (int)row.Cells["Loi"].Value && d.Cuon == (string)row.Cells["Cuon"].Value));
+                dsChonDiVat.Add(DSDiVat.FirstOrDefault(d => d.Loi == (int)row.Cells["Loi"].Value && d.TenCuon == (string)row.Cells["TenCuon"].Value));
             }
 
             for (int i= 0; i < dsChonDiVat.Count; i++)
             {
                 if (i == 0)
                     continue;
-                if (dsChonDiVat[i].Cuon != dsChonDiVat[i - 1].Cuon)
+                if (dsChonDiVat[i].TenCuon != dsChonDiVat[i - 1].TenCuon)
                 {
                     MessageBox.Show("Không thể gộp ảnh từ cuộn khác nhau", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;

@@ -11,7 +11,7 @@ namespace DetectObject.Utils
         public static DateTime ThoiDiemBatDauCuonMoi = DateTime.MinValue;
         public static string TenCuon = string.Empty;
         public static double VanToc = 0;// đơn vị: m/s
-        public static double DoCao1KhungHinhThucTe = 0.8; // đơn vị: m
+        public static double DoCao1KhungHinhThucTe = 0.6; // đơn vị: m (theo cach tinh thuc te la: 1.36, thu don vi nho hon de lay nhieu hinh loi hon)
         public static string ThuMucLuuLoi = string.Empty;
     }
 

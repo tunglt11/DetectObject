@@ -45,6 +45,7 @@
             this.btnSangCuon = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.btnTai = new System.Windows.Forms.Button();
             this.btnTimKiem = new System.Windows.Forms.Button();
             this.cbCuon = new System.Windows.Forms.ComboBox();
             this.lbCuon = new System.Windows.Forms.Label();
@@ -57,11 +58,10 @@
             this.Loi = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ThoiGianLoi = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ViTriLoi = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Cuon = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TenCuon = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Image = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.btnBatdau = new System.Windows.Forms.Button();
-            this.btnTai = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -150,7 +150,7 @@
             this.txtVanToc.Name = "txtVanToc";
             this.txtVanToc.Size = new System.Drawing.Size(90, 22);
             this.txtVanToc.TabIndex = 4;
-            this.txtVanToc.Text = "0.5";
+            this.txtVanToc.Text = "0.383";
             // 
             // label4
             // 
@@ -242,6 +242,16 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Danh sách lỗi";
             // 
+            // btnTai
+            // 
+            this.btnTai.Location = new System.Drawing.Point(566, 19);
+            this.btnTai.Name = "btnTai";
+            this.btnTai.Size = new System.Drawing.Size(96, 29);
+            this.btnTai.TabIndex = 12;
+            this.btnTai.Text = "Tải";
+            this.btnTai.UseVisualStyleBackColor = true;
+            this.btnTai.Click += new System.EventHandler(this.btnTai_Click);
+            // 
             // btnTimKiem
             // 
             this.btnTimKiem.Location = new System.Drawing.Point(376, 19);
@@ -326,7 +336,7 @@
             this.Loi,
             this.ThoiGianLoi,
             this.ViTriLoi,
-            this.Cuon,
+            this.TenCuon,
             this.Image});
             this.dgvDSLoi.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvDSLoi.Location = new System.Drawing.Point(0, 0);
@@ -366,14 +376,14 @@
             this.ViTriLoi.ReadOnly = true;
             this.ViTriLoi.Width = 150;
             // 
-            // Cuon
+            // TenCuon
             // 
-            this.Cuon.DataPropertyName = "Cuon";
-            this.Cuon.HeaderText = "Cuộn";
-            this.Cuon.MinimumWidth = 6;
-            this.Cuon.Name = "Cuon";
-            this.Cuon.ReadOnly = true;
-            this.Cuon.Width = 138;
+            this.TenCuon.DataPropertyName = "TenCuon";
+            this.TenCuon.HeaderText = "Cuộn";
+            this.TenCuon.MinimumWidth = 6;
+            this.TenCuon.Name = "TenCuon";
+            this.TenCuon.ReadOnly = true;
+            this.TenCuon.Width = 138;
             // 
             // Image
             // 
@@ -399,16 +409,6 @@
             this.btnBatdau.Text = "Bắt đầu";
             this.btnBatdau.UseVisualStyleBackColor = true;
             this.btnBatdau.Click += new System.EventHandler(this.btnBatdau_Click);
-            // 
-            // btnTai
-            // 
-            this.btnTai.Location = new System.Drawing.Point(566, 19);
-            this.btnTai.Name = "btnTai";
-            this.btnTai.Size = new System.Drawing.Size(96, 29);
-            this.btnTai.TabIndex = 12;
-            this.btnTai.Text = "Tải";
-            this.btnTai.UseVisualStyleBackColor = true;
-            this.btnTai.Click += new System.EventHandler(this.btnTai_Click);
             // 
             // frmMain
             // 
@@ -464,11 +464,6 @@
         private System.Windows.Forms.DataGridView dgvDSLoi;
         protected System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Loi;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ThoiGianLoi;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ViTriLoi;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Cuon;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Image;
         private System.Windows.Forms.Button btnBatdau;
         private System.Windows.Forms.Button btnTimKiem;
         private System.Windows.Forms.ComboBox cbCuon;
@@ -476,6 +471,11 @@
         private System.Windows.Forms.Label lbNgay;
         private System.Windows.Forms.DateTimePicker dtPickerNgayTimKiem;
         private System.Windows.Forms.Button btnTai;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Loi;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ThoiGianLoi;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ViTriLoi;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TenCuon;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Image;
     }
 }
 
