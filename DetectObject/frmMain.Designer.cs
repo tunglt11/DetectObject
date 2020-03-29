@@ -302,12 +302,12 @@
             // btnGopLoi
             // 
             this.btnGopLoi.Location = new System.Drawing.Point(774, 19);
-            this.btnGopLoi.Name = "btnGopLoi";
+            this.btnGopLoi.Name = "btnXoa";
             this.btnGopLoi.Size = new System.Drawing.Size(96, 29);
             this.btnGopLoi.TabIndex = 7;
-            this.btnGopLoi.Text = "Gộp lỗi";
+            this.btnGopLoi.Text = "Xóa";
             this.btnGopLoi.UseVisualStyleBackColor = true;
-            this.btnGopLoi.Click += new System.EventHandler(this.btnGopLoi_Click);
+            this.btnGopLoi.Click += new System.EventHandler(this.btnXoa_Click);
             // 
             // btnXemAnh
             // 
@@ -348,6 +348,7 @@
             this.dgvDSLoi.TabIndex = 0;
             this.dgvDSLoi.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDSLoi_CellClick);
             this.dgvDSLoi.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDSLoi_CellDoubleClick);
+            this.dgvDSLoi.SelectionChanged += new System.EventHandler(this.dgvDSLoi_SelectionChanged);
             // 
             // Loi
             // 

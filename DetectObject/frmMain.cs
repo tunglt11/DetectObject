@@ -7,6 +7,7 @@ using GeneralDef;
 using log4net;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
@@ -285,52 +286,61 @@ namespace DetectObject
             pictureBox1.Image = System.Drawing.Image.FromFile(diVat.ImagePath);
         }
 
-        private void btnGopLoi_Click(object sender, EventArgs e)
+        private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (btnStop.Enabled == true)
+            var dialog = MessageBox.Show("Bạn có muốn xóa những lỗi được chọn không?", "Xóa lỗi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dialog == DialogResult.Yes)
             {
-                MessageBox.Show("Không thể gộp lỗi khi chương trình đang chạy.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (dgvDSLoi.SelectedRows.Count <= 1)
-            {
-                MessageBox.Show("Bạn phải chọn ít nhất 2 lỗi để gộp ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (dgvDSLoi.SelectedRows.Count > 6)
-            {
-                MessageBox.Show("Bạn không thể chọn hơn 6 lỗi.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var dsChonDiVat = new List<DiVat>();
-            int maxIndex = dgvDSLoi.SelectedRows[0].Index;
-            foreach (DataGridViewRow row in dgvDSLoi.SelectedRows)
-            {
-                if (row.Index != maxIndex)
+                var htTenCuonDaXoa = new Hashtable();
+                var htTenCuonSauKhiXoa = new Hashtable();
+                var htIndex = new Hashtable();
+                for (int i = 0; i < DSDiVat.Count; i++)
                 {
-                    MessageBox.Show("Vui lòng chọn các lỗi liên tiếp nhau.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    htIndex[DSDiVat[i].Loi + DSDiVat[i].TenCuon] = i;
                 }
-                maxIndex -= 1;
-                dsChonDiVat.Add(DSDiVat.FirstOrDefault(d => d.Loi == (int)row.Cells["Loi"].Value && d.TenCuon == (string)row.Cells["TenCuon"].Value));
-            }
 
-            for (int i= 0; i < dsChonDiVat.Count; i++)
-            {
-                if (i == 0)
-                    continue;
-                if (dsChonDiVat[i].TenCuon != dsChonDiVat[i - 1].TenCuon)
+                //xoa loi duoc chon tren gridview
+                foreach (DataGridViewRow row in dgvDSLoi.SelectedRows)
                 {
-                    MessageBox.Show("Không thể gộp ảnh từ cuộn khác nhau", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    int loi = (int)row.Cells["Loi"].Value;
+                    string tenCuon = (string)row.Cells["TenCuon"].Value;
+                    if (!htTenCuonDaXoa.ContainsKey(tenCuon))
+                    {
+                        htTenCuonDaXoa[tenCuon] = "";
+                    }
+                    DSDiVat.RemoveAt((int)htIndex[loi + tenCuon]);
                 }
-            }
 
-            var frmGopAnh = new frmGopAnhLoi(this, dsChonDiVat);
-            frmGopAnh.Show(this);
+                var grDiVat = DSDiVat.GroupBy(g => g.TenCuon).Select(g => new { TenCuon = g.Key, DSLoi = g.ToList() }).ToList();
+                foreach (var dsDiVat in grDiVat)
+                {
+                    if (htTenCuonDaXoa.ContainsKey(dsDiVat.TenCuon))
+                    {
+                        // danh lai so thu loi
+                        for(int i = 0; i < dsDiVat.DSLoi.Count; i++)
+                        {
+                            dsDiVat.DSLoi[i].Loi = i + 1;
+                        }
+
+                        //ghi loi vao file
+                        var content = JsonConvert.SerializeObject(dsDiVat.DSLoi).Replace("[", "").Replace("]", "");
+                        File.WriteAllText(LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + dsDiVat.TenCuon + ".txt", content);
+                    }
+                    htTenCuonSauKhiXoa[dsDiVat.TenCuon] = "";
+                }
+
+                //khi nhung cuon duoc xoa het loi thi luu file trong
+                foreach (DictionaryEntry dic in htTenCuonDaXoa)
+                {
+                    if (!htTenCuonSauKhiXoa.ContainsKey(dic.Key))
+                    {
+                        File.WriteAllText(LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + dic.Key + ".txt", string.Empty);
+                    }
+                }
+
+                bsDiVat.ResetBindings(false);
+                DemLoi();
+            }
         }
 
         private void btnBatdau_Click(object sender, EventArgs e)
@@ -394,6 +404,7 @@ namespace DetectObject
             DSDiVat = new List<DiVat>();
             if (directories != null)
             {
+                Utilities.ThuMucLuuLoi = dtPickerNgayTimKiem.Value.ToString("MMddyyyy");
                 for (int i = 0; i < directories.Length; i++)
                 {
                     if (directories[i] == selectedDate)
@@ -412,7 +423,6 @@ namespace DetectObject
                                 if (Path.GetFileName(files[j].Replace(".txt", "")) == cbCuon.Text)
                                 {
                                     Utilities.TenCuon = cbCuon.Text;
-                                    Utilities.ThuMucLuuLoi = dtPickerNgayTimKiem.Value.ToString("MMddyyyy");
                                     var json = "[" + File.ReadAllText(files[j]) + "]";
                                     if (!string.IsNullOrWhiteSpace(json))
                                     {
@@ -437,6 +447,15 @@ namespace DetectObject
         private void btnTai_Click(object sender, EventArgs e)
         {
             bsDiVat.ResetBindings(false);
+        }
+
+        private void dgvDSLoi_SelectionChanged(object sender, EventArgs e)
+        {
+            var diVat = DSDiVat.FirstOrDefault(d => d.Loi == Convert.ToInt32(dgvDSLoi.CurrentRow.Cells["Loi"].Value) && d.TenCuon == (string)dgvDSLoi.CurrentRow.Cells["TenCuon"].Value);
+            if (diVat != null)
+            {
+                pictureBox1.Image = System.Drawing.Image.FromFile(diVat.ImagePath);
+            }
         }
     }
 }
