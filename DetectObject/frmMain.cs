@@ -63,27 +63,26 @@ namespace DetectObject
             Action ResetUI = new Action(() => { /*bsDiVat.ResetBindings(true);*/ DemLoi(); });
             try
             {
+                HienThiTrangThai("Đang kết nối đến camera");
                 Mat m = new Mat();
                 videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera], VideoCapture.API.Ffmpeg);
                 if (videoCapture.IsOpened)
                 {
+                    HienThiTrangThai("Kết nối đến camera thành công");
                     while (true)
                     {
                         videoCapture.Read(m);
                         if (!m.IsEmpty)
                         {
-                            var img = m.ToImage<Bgr, byte>();
-                            img.ROI = _ROI;
-                            Image<Bgr, byte> inputImage = img.CopyBlank();
-                            img.CopyTo(inputImage);
                             if (IsScan)
                             {
+                                var img = m.ToImage<Bgr, byte>();
+                                img.ROI = _ROI;
+                                Image<Bgr, byte> inputImage = img.CopyBlank();
+                                img.CopyTo(inputImage);
                                 Scan(inputImage, ResetUI);
                             }
-                            else
-                            {
-                                img.Dispose();
-                            }
+                           
                             Task.Delay(200);
                         }
                     }
@@ -91,6 +90,7 @@ namespace DetectObject
             }
             catch (Exception ex)
             {
+                HienThiTrangThai("Lỗi kết nối đến camera");
                 log.Error("Loi o chuc nang ScanObject", ex);
             }
             finally
@@ -142,6 +142,11 @@ namespace DetectObject
                 SaveContent(savedFilePath, content);
             }
         }
+
+        private void HienThiTrangThai(string content)
+        {
+            this.Invoke(new Action(() => { lbTrangThai.Text = content; }));
+        }
        
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -158,6 +163,7 @@ namespace DetectObject
             btnDung.Enabled = false;
             btnSangCuon.Enabled = true;
             btnXoa.Enabled = true;
+            HienThiTrangThai("Đang dừng quét");
             AnHienTimKiem(true);
         }
 
@@ -178,6 +184,7 @@ namespace DetectObject
             DemLoi();
             pictureBox1.Image = null;
             BindingData();
+            HienThiTrangThai("Đang quét");
             AnHienTimKiem(false);
         }
 
@@ -308,6 +315,7 @@ namespace DetectObject
         private void btnQuet_Click(object sender, EventArgs e)
         {
             IsScan = true;
+            HienThiTrangThai("Đang quét");
             //trường hợp lúc khởi động chương trình
             if (!btnTamDung.Enabled && !btnDung.Enabled && !btnSangCuon.Enabled)
             {
@@ -450,6 +458,7 @@ namespace DetectObject
             btnSangCuon.Enabled = false;
             IsScan = false;
             Utilities.ThoiDiemTamDung = DateTime.Now;
+            HienThiTrangThai("Tạm dừng quét");
         }
     }
 }
