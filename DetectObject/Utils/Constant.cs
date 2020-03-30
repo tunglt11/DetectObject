@@ -10,5 +10,6 @@ namespace DetectObject.Utils
     {
         public const string Camera = "cam";
         public const string ROI = "ROI";
+        public const string VanToc = "VanToc";
     }
 }

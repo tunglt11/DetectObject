@@ -30,7 +30,6 @@ namespace DetectObject
         bool IsScan = false;
         VideoCapture videoCapture = null;
         double ViTriLoiMoiNhat = 0;
-        PictureBox pictureBoxCamera;
         Rectangle _ROI;
         public frmMain()
         {
@@ -46,18 +45,17 @@ namespace DetectObject
             _ROI.Width = Convert.ToInt32(roi[2]);
             _ROI.Height = Convert.ToInt32(roi[3]);
             #endregion
+            #region Toc do
+            string vanToc = ConfigurationManager.AppSettings[Constant.VanToc];
+            lbVanToc.Text = vanToc + " mét/phút";
+            Utilities.VanToc = Convert.ToDouble(vanToc) / 60;
+            #endregion
         }
 
         private void frmMain_Shown(object sender, EventArgs e)
         {
-            #region Setup camera
-            pictureBoxCamera = new PictureBox();
-            pictureBoxCamera.Name = "camera";
-            pictureBoxCamera.Dock = DockStyle.Fill;
-            pictureBoxCamera.SizeMode = PictureBoxSizeMode.StretchImage;
-            tlpCamera.Controls.Add(pictureBoxCamera);
+            StartCapture();
             AnHienTimKiem(true);
-            #endregion
         }
 
         private void ScanObject()
@@ -78,7 +76,6 @@ namespace DetectObject
                             img.ROI = _ROI;
                             Image<Bgr, byte> inputImage = img.CopyBlank();
                             img.CopyTo(inputImage);
-                            pictureBoxCamera.Image = inputImage.Bitmap;
                             if (IsScan)
                             {
                                 Scan(inputImage, ResetUI);
@@ -124,9 +121,6 @@ namespace DetectObject
                             content = "," + content;
                         }
                         
-                        //var diVatService = new DiVatService();
-                        //diVatService.LuuDiVat(diVat);
-
                         this.Invoke(ResetUI);
                         SaveContent(savedFilePath, content);
                     }
@@ -156,38 +150,35 @@ namespace DetectObject
             //CameraHelper.StopRecord(Constant.Camera);
         }
 
-        private void btnStop_Click(object sender, EventArgs e)
+        private void btnDung_Click(object sender, EventArgs e)
         {
             IsScan = false;
+            btnQuet.Enabled = false;
+            btnTamDung.Enabled = false;
+            btnDung.Enabled = false;
             btnSangCuon.Enabled = true;
-            btnStop.Enabled = false;
-            btnGopLoi.Enabled = true;
+            btnXoa.Enabled = true;
             AnHienTimKiem(true);
         }
 
         private void btnSangCuon_Click(object sender, EventArgs e)
         {
-            if (CommonFunc.IsNumber(txtVanToc.Text))
-            {
-                IsScan = true;
-                ViTriLoiMoiNhat = 0;
-                btnSangCuon.Enabled = false;
-                btnStop.Enabled = true;
-                btnGopLoi.Enabled = false;
-                Utilities.VanToc = Convert.ToDouble(txtVanToc.Text);
-                Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
-                Utilities.TenCuon = LayTenCuonHienTai();
-                Utilities.ThuMucLuuLoi = TaoThuMucLuuLoi();
-                DSDiVat = new List<DiVat>();
-                DemLoi();
-                pictureBox1.Image = null;
-                BindingData();
-                AnHienTimKiem(false);
-            }
-            else
-            {
-                MessageBox.Show("Trường vận tốc không đúng định dạng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            IsScan = true;
+            ViTriLoiMoiNhat = 0;
+            btnSangCuon.Enabled = false;
+            btnTamDung.Enabled = true;
+            btnDung.Enabled = true;
+            btnQuet.Enabled = false;
+            btnXoa.Enabled = false;
+            Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
+            Utilities.TenCuon = LayTenCuonHienTai();
+            Utilities.ThuMucLuuLoi = TaoThuMucLuuLoi();
+            lbTenCuon.Text = Utilities.TenCuon;
+            DSDiVat = new List<DiVat>();
+            DemLoi();
+            pictureBox1.Image = null;
+            BindingData();
+            AnHienTimKiem(false);
         }
 
         private string LayTenCuonHienTai()
@@ -227,38 +218,9 @@ namespace DetectObject
             }
         }
 
-        //private void TaoVideo()
-        //{
-        //    CameraHelper.StopRecord(Constant.Camera);
-        //    CameraHelper.StopRealPlay(Constant.Camera);
-        //    CameraHelper.AddCamera(tlpCamera, Constant.Camera, new Point(0, 0));
-        //    CameraHelper.StartRealPlay(Constant.Camera);
-        //    CameraHelper.StartRecord(Constant.Camera);
-        //}
-
-        private void timer1_Tick(object sender, EventArgs e)
+        private void btnIn_Click(object sender, EventArgs e)
         {
-            //TaoVideo();
-        }
-
-        private void btnXemAnh_Click(object sender, EventArgs e)
-        {
-            if (dgvDSLoi.SelectedRows.Count > 1)
-            {
-                MessageBox.Show("Vui lòng chỉ chọn 1 lỗi để xem ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error); ;
-                return;
-            }
-
-            if (dgvDSLoi.CurrentRow.Selected)
-            {
-                var diVat = DSDiVat.FirstOrDefault(d => d.Loi == Convert.ToInt32(dgvDSLoi.CurrentRow.Cells["Loi"].Value));
-                var frmHienThiAnh = new frmHienThiAnhLoi(diVat);
-                frmHienThiAnh.Show(this);
-            }
-            else
-            {
-                MessageBox.Show("Bạn chưa chọn lỗi nào để xem ảnh.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            MessageBox.Show("Chúng tôi đang phát triển tính năng này. Vui lòng đợi thêm vài ngày. Cảm ơn!", "Thông tin", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public void DemLoi()
@@ -299,7 +261,7 @@ namespace DetectObject
                     htIndex[DSDiVat[i].Loi + DSDiVat[i].TenCuon] = i;
                 }
 
-                //xoa loi duoc chon tren gridview
+                //xóa lỗi được chọn trên gridview
                 foreach (DataGridViewRow row in dgvDSLoi.SelectedRows)
                 {
                     int loi = (int)row.Cells["Loi"].Value;
@@ -316,20 +278,20 @@ namespace DetectObject
                 {
                     if (htTenCuonDaXoa.ContainsKey(dsDiVat.TenCuon))
                     {
-                        // danh lai so thu loi
+                        // đánh lại số thứ tự lỗi
                         for(int i = 0; i < dsDiVat.DSLoi.Count; i++)
                         {
                             dsDiVat.DSLoi[i].Loi = i + 1;
                         }
 
-                        //ghi loi vao file
+                        //ghi lỗi vào file
                         var content = JsonConvert.SerializeObject(dsDiVat.DSLoi).Replace("[", "").Replace("]", "");
                         File.WriteAllText(LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + dsDiVat.TenCuon + ".txt", content);
                     }
                     htTenCuonSauKhiXoa[dsDiVat.TenCuon] = "";
                 }
 
-                //khi nhung cuon duoc xoa het loi thi luu file trong
+                //khi xóa hết lỗi của một cuộn thì cuộn đó lưu file trống
                 foreach (DictionaryEntry dic in htTenCuonDaXoa)
                 {
                     if (!htTenCuonSauKhiXoa.ContainsKey(dic.Key))
@@ -343,13 +305,34 @@ namespace DetectObject
             }
         }
 
-        private void btnBatdau_Click(object sender, EventArgs e)
+        private void btnQuet_Click(object sender, EventArgs e)
         {
-            btnSangCuon.Enabled = true;
-            btnBatdau.Enabled = false;
-            #region Scan Object
-            StartCapture();
-            #endregion
+            IsScan = true;
+            //trường hợp lúc khởi động chương trình
+            if (!btnTamDung.Enabled && !btnDung.Enabled && !btnSangCuon.Enabled)
+            {
+                btnXoa.Enabled = false;
+                Utilities.ThoiDiemBatDauCuonMoi = DateTime.Now;
+                Utilities.TenCuon = LayTenCuonHienTai();
+                Utilities.ThuMucLuuLoi = TaoThuMucLuuLoi();
+                lbTenCuon.Text = Utilities.TenCuon;
+                DSDiVat = new List<DiVat>();
+                BindingData();
+                AnHienTimKiem(false);
+            }
+            else
+            {
+                //trường hợp tạm dừng chương trình sau đó tiếp tục quét
+                var khoangThoiGianTamDungChuongTrinhDenQuetLai = DateTime.Now - Utilities.ThoiDiemTamDung;
+
+                //cập nhập thời điểm bắt đầu cuộn mới để tính độ dài cuộn (s = v * t [t = thời điểm hiện tại - thời điểm bắt đầu cuộn])
+                Utilities.ThoiDiemBatDauCuonMoi += khoangThoiGianTamDungChuongTrinhDenQuetLai; 
+            }
+
+            btnTamDung.Enabled = true;
+            btnDung.Enabled = true;
+            btnQuet.Enabled = false;
+            btnSangCuon.Enabled = false;
         }
 
         private void StartCapture()
@@ -423,6 +406,7 @@ namespace DetectObject
                                 if (Path.GetFileName(files[j].Replace(".txt", "")) == cbCuon.Text)
                                 {
                                     Utilities.TenCuon = cbCuon.Text;
+                                    lbTenCuon.Text = Utilities.TenCuon;
                                     var json = "[" + File.ReadAllText(files[j]) + "]";
                                     if (!string.IsNullOrWhiteSpace(json))
                                     {
@@ -456,6 +440,16 @@ namespace DetectObject
             {
                 pictureBox1.Image = System.Drawing.Image.FromFile(diVat.ImagePath);
             }
+        }
+
+        private void btnTamDung_Click(object sender, EventArgs e)
+        {
+            btnQuet.Enabled = true;
+            btnDung.Enabled = true;
+            btnTamDung.Enabled = false;
+            btnSangCuon.Enabled = false;
+            IsScan = false;
+            Utilities.ThoiDiemTamDung = DateTime.Now;
         }
     }
 }
