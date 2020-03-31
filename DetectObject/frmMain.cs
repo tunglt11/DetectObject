@@ -64,11 +64,14 @@ namespace DetectObject
             try
             {
                 HienThiTrangThai("Đang kết nối đến camera");
+                log.Info("Dang ket noi camera");
                 Mat m = new Mat();
                 videoCapture = new VideoCapture(ConfigurationManager.AppSettings[Constant.Camera], VideoCapture.API.Ffmpeg);
                 if (videoCapture.IsOpened)
                 {
+                    log.Info("Ket noi den camera thanh cong.");
                     HienThiTrangThai("Kết nối đến camera thành công");
+                    LockButton(btnQuet, true);
                     while (true)
                     {
                         videoCapture.Read(m);
@@ -82,10 +85,14 @@ namespace DetectObject
                                 img.CopyTo(inputImage);
                                 Scan(inputImage, ResetUI);
                             }
-                           
+
                             Task.Delay(200);
                         }
                     }
+                }
+                else
+                {
+                    log.Info("Khong the ket noi den camera");
                 }
             }
             catch (Exception ex)
@@ -109,7 +116,7 @@ namespace DetectObject
                 {
                     var thoiDiemLoi = DateTime.Now;
                     var viTriLoiHienTai = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc;
-                    if (viTriLoiHienTai - ViTriLoiMoiNhat <= Utilities.DoCao1KhungHinhThucTe)
+                    if (viTriLoiHienTai - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
                     {
                         ViTriLoiMoiNhat = viTriLoiHienTai;
                         var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoiHienTai, TenCuon = Utilities.TenCuon, ImagePath = savedImagePath };
@@ -147,6 +154,11 @@ namespace DetectObject
         {
             this.Invoke(new Action(() => { lbTrangThai.Text = content; }));
         }
+
+        private void LockButton(Button btn, bool status)
+        {
+            this.Invoke(new Action(() => { btn.Enabled = status; }));
+        }
        
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -165,6 +177,7 @@ namespace DetectObject
             btnXoa.Enabled = true;
             HienThiTrangThai("Đang dừng quét");
             AnHienTimKiem(true);
+            log.Info("Dung");
         }
 
         private void btnSangCuon_Click(object sender, EventArgs e)
@@ -186,6 +199,7 @@ namespace DetectObject
             BindingData();
             HienThiTrangThai("Đang quét");
             AnHienTimKiem(false);
+            log.Info("Sang cuon");
         }
 
         private string LayTenCuonHienTai()
@@ -341,6 +355,7 @@ namespace DetectObject
             btnDung.Enabled = true;
             btnQuet.Enabled = false;
             btnSangCuon.Enabled = false;
+            log.Info("Quet");
         }
 
         private void StartCapture()
@@ -459,6 +474,7 @@ namespace DetectObject
             IsScan = false;
             Utilities.ThoiDiemTamDung = DateTime.Now;
             HienThiTrangThai("Tạm dừng quét");
+            log.Info("Tam dung");
         }
     }
 }

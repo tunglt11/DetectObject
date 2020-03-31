@@ -282,6 +282,7 @@
             // 
             // btnQuet
             // 
+            this.btnQuet.Enabled = false;
             this.btnQuet.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnQuet.Location = new System.Drawing.Point(28, 258);
             this.btnQuet.Name = "btnQuet";
