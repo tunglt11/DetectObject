@@ -30,7 +30,7 @@ namespace DetectObject.Utils
             for (int i = 0; i < contours.Size; i++)
             {
                 Rectangle brect = CvInvoke.BoundingRectangle(contours[i]);
-                if (brect.Width > 10 && brect.Height > 10)
+                if (brect.Width > Utilities.Size.Width && brect.Height > Utilities.Size.Height)
                 {
                     list.Add(brect);
                 }

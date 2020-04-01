@@ -47,8 +47,11 @@ namespace DetectObject
             #endregion
             #region Toc do
             string vanToc = ConfigurationManager.AppSettings[Constant.VanToc];
+            string[] size = ConfigurationManager.AppSettings[Constant.DienTichVet].Split(',');
             lbVanToc.Text = vanToc + " mét/phút";
             Utilities.VanToc = Convert.ToDouble(vanToc) / 60;
+            Utilities.DoCao1KhungHinhThucTe = Convert.ToDouble(ConfigurationManager.AppSettings[Constant.ChieuCaoKhungHinh]);
+            Utilities.Size = new Size(Convert.ToInt32(size[0]), Convert.ToInt32(size[1]));
             #endregion
         }
 
