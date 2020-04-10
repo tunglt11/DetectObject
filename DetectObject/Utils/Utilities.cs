@@ -15,6 +15,7 @@ namespace DetectObject.Utils
         public static double DoCao1KhungHinhThucTe = 0.6; // đơn vị: m (theo cach tinh thuc te la: 1.36, thu don vi nho hon de lay nhieu hinh loi hon)
         public static string ThuMucLuuLoi = string.Empty;
         public static System.Drawing.Size Size = new System.Drawing.Size(0, 0);
+        public static double LIMIT_AREA = 500;
     }
 
     public class ThamSo

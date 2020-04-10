@@ -14,6 +14,7 @@ using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -31,6 +32,10 @@ namespace DetectObject
         VideoCapture videoCapture = null;
         double ViTriLoiMoiNhat = 0;
         Rectangle _ROI;
+        
+        // ket noi chuong den
+        SerialPort serialPort;
+
         public frmMain()
         {
             InitializeComponent();
@@ -53,6 +58,21 @@ namespace DetectObject
             Utilities.DoCao1KhungHinhThucTe = Convert.ToDouble(ConfigurationManager.AppSettings[Constant.ChieuCaoKhungHinh]);
             Utilities.Size = new Size(Convert.ToInt32(size[0]), Convert.ToInt32(size[1]));
             #endregion
+
+            //gioi han kich thuoc di vat phat hien
+            Utilities.LIMIT_AREA = double.Parse(ConfigurationManager.AppSettings["LIMIT_AREA"]);
+            
+            // mo cong COM cho chuong den
+            try
+            {
+                string comName = ConfigurationManager.AppSettings.Get("COM");
+                serialPort = new SerialPort(comName, 9600, Parity.None, 8);
+                serialPort.Open();
+                log.Info(comName + " is opened...");
+            }catch(Exception ex)
+            {
+                log.Error(ex.Message);
+            }            
         }
 
         private void frmMain_Shown(object sender, EventArgs e)
@@ -117,6 +137,9 @@ namespace DetectObject
                 string savedImagePath;
                 if (Detecter.DetectObject(inputImage, out heightOfObject, out savedImagePath))
                 {
+                    //thong bao chuong den
+                    new Thread(new ThreadStart(ThongBaoChuongDen)).Start();
+
                     var thoiDiemLoi = DateTime.Now;
                     var viTriLoiHienTai = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc;
                     if (viTriLoiHienTai - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
@@ -137,6 +160,35 @@ namespace DetectObject
                 }
                 inputImage.Dispose();
             });
+        }
+
+        private void ThongBaoChuongDen()
+        {
+            try
+            {
+                if(serialPort==null && !serialPort.IsOpen)
+                {
+                    log.Info("COM port is NOT ready");
+                    return;
+                }
+
+                log.Info("Thong bao chuong den");
+                
+                serialPort.WriteLine("on");
+                Thread.Sleep(1000);
+
+                serialPort.WriteLine("off");
+                Thread.Sleep(500);
+
+                serialPort.WriteLine("on");
+                Thread.Sleep(1000);
+
+                serialPort.WriteLine("off");
+            }
+            catch(Exception ex)
+            {
+                log.Error(ex.Message);
+            }            
         }
 
         private void SaveContent(string savedFilePath, string content)
@@ -168,6 +220,16 @@ namespace DetectObject
         {
             //CameraHelper.StopRealPlay(Constant.Camera);
             //CameraHelper.StopRecord(Constant.Camera);
+            try
+            {
+                log.Info("Closing COM port...");
+                serialPort.Close();                
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex.Message);
+            }
+            
         }
 
         private void btnDung_Click(object sender, EventArgs e)

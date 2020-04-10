@@ -30,7 +30,8 @@ namespace DetectObject.Utils
             for (int i = 0; i < contours.Size; i++)
             {
                 Rectangle brect = CvInvoke.BoundingRectangle(contours[i]);
-                if (brect.Width > Utilities.Size.Width && brect.Height > Utilities.Size.Height)
+                //if (brect.Width > Utilities.Size.Width && brect.Height > Utilities.Size.Height)
+                if (CvInvoke.ContourArea(contours[i]) > Utilities.LIMIT_AREA)
                 {
                     list.Add(brect);
                 }
@@ -68,6 +69,40 @@ namespace DetectObject.Utils
             }
 
             return list.Count > 0;
+        }
+
+        public static bool DetectSpot(Image<Bgr, byte> imgInput, out int heighOfObject, out string savedImagePath)
+        {
+            heighOfObject = 0;
+            savedImagePath = string.Empty;
+            
+            //convert image to gray binary & threshoding
+            Image<Gray, byte> imgOutput = imgInput.Convert<Gray, byte>().ThresholdBinary(new Gray(127), new Gray(255));            
+                        
+            //find contours
+            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+            {
+                CvInvoke.FindContours(imgOutput, contours, null, Emgu.CV.CvEnum.RetrType.List, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
+                if (contours.Size > 0)
+                {
+                    for (int i = 0; i < contours.Size; i++)
+                    {
+                        if (CvInvoke.ContourArea(contours[i]) > Utilities.LIMIT_AREA)     //skip small area spot
+                        {
+                            var savedFolderPath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + "\\";
+                            savedImagePath = savedFolderPath + CommonFunc.ConvertDateTimeToInvariantInfo(DateTime.Now) + ".jpg";
+                            if (!Directory.Exists(savedFolderPath))
+                            {
+                                Directory.CreateDirectory(savedFolderPath);
+                            }
+                            imgInput.Save(savedImagePath);
+                            heighOfObject = CvInvoke.BoundingRectangle(contours[i]).Height;
+                            return true;
+                        }
+                    }
+                }
+            }                
+            return false;
         }
     }
 }
