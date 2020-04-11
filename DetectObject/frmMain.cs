@@ -137,13 +137,12 @@ namespace DetectObject
                 string savedImagePath;
                 if (Detecter.DetectObject(inputImage, out heightOfObject, out savedImagePath))
                 {
-                    //thong bao chuong den
-                    new Thread(new ThreadStart(ThongBaoChuongDen)).Start();
-
                     var thoiDiemLoi = DateTime.Now;
                     var viTriLoiHienTai = (thoiDiemLoi - Utilities.ThoiDiemBatDauCuonMoi).TotalSeconds * Utilities.VanToc;
                     if (viTriLoiHienTai - ViTriLoiMoiNhat >= Utilities.DoCao1KhungHinhThucTe)
                     {
+                        //thong bao chuong den
+                        new Thread(new ThreadStart(ThongBaoChuongDen)).Start();
                         ViTriLoiMoiNhat = viTriLoiHienTai;
                         var diVat = new DiVat() { Loi = DSDiVat.Count + 1, ThoiGianLoi = thoiDiemLoi, ViTriLoi = viTriLoiHienTai, TenCuon = Utilities.TenCuon, ImagePath = savedImagePath };
                         DSDiVat.Add(diVat);

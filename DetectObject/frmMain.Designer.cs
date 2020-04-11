@@ -201,6 +201,7 @@
             this.btnIn.TabIndex = 6;
             this.btnIn.Text = "In";
             this.btnIn.UseVisualStyleBackColor = true;
+            this.btnIn.Visible = false;
             this.btnIn.Click += new System.EventHandler(this.btnIn_Click);
             // 
             // panel1
