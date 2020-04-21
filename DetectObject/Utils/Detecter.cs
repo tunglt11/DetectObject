@@ -11,14 +11,17 @@ using DetectObject.Model;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using log4net;
 
 namespace DetectObject.Utils
 {
     public class Detecter
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Detecter));
+
         public static bool DetectObject(Image<Bgr, byte> imgInput, out int heighOfObject, out string savedImagePath)
         {
-            var sobel = imgInput.Convert<Gray, byte>().Canny(150, 250);
+            var sobel = imgInput.Convert<Gray, byte>().Canny(10, 200);
             heighOfObject = 0;
             savedImagePath = string.Empty;
             Mat SE = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Cross, new Size(50, 1), new Point(-1, -1));
@@ -26,9 +29,17 @@ namespace DetectObject.Utils
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
             Mat m = new Mat();
             CvInvoke.FindContours(sobel, contours, m, Emgu.CV.CvEnum.RetrType.List, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
+
+            //neu khong phat hien hoac bi dut giay
+            if (contours.Size == 0 || contours.Size > Utilities.MAX_CONTOURS)
+                return false;
+
+            log.Info("Contours size: " + contours.Size);
+
             List<Rectangle> list = new List<Rectangle>();
             for (int i = 0; i < contours.Size; i++)
             {
+                log.Info("Contour area: " + CvInvoke.ContourArea(contours[i]));
                 Rectangle brect = CvInvoke.BoundingRectangle(contours[i]);
                 //if (brect.Width > Utilities.Size.Width && brect.Height > Utilities.Size.Height)
                 if (CvInvoke.ContourArea(contours[i]) > Utilities.LIMIT_AREA)
@@ -75,9 +86,9 @@ namespace DetectObject.Utils
         {
             heighOfObject = 0;
             savedImagePath = string.Empty;
-            
+
             //convert image to gray binary & threshoding
-            Image<Gray, byte> imgOutput = imgInput.Convert<Gray, byte>().ThresholdBinary(new Gray(127), new Gray(255));            
+            Image<Gray, byte> imgOutput = imgInput.Convert<Gray, byte>().Canny(10, 200);
                         
             //find contours
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
@@ -85,8 +96,10 @@ namespace DetectObject.Utils
                 CvInvoke.FindContours(imgOutput, contours, null, Emgu.CV.CvEnum.RetrType.List, Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple);
                 if (contours.Size > 0)
                 {
+                    log.Info("Contours size: " + contours.Size);
                     for (int i = 0; i < contours.Size; i++)
                     {
+                        log.Info("Contour area " + CvInvoke.ContourArea(contours[i]));
                         if (CvInvoke.ContourArea(contours[i]) > Utilities.LIMIT_AREA)     //skip small area spot
                         {
                             var savedFolderPath = LocalSetting.m_strDataPath + Utilities.ThuMucLuuLoi + "\\" + Utilities.TenCuon + "\\";

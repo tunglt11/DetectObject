@@ -16,6 +16,7 @@ namespace DetectObject.Utils
         public static string ThuMucLuuLoi = string.Empty;
         public static System.Drawing.Size Size = new System.Drawing.Size(0, 0);
         public static double LIMIT_AREA = 500;
+        public static int MAX_CONTOURS= 100;
     }
 
     public class ThamSo

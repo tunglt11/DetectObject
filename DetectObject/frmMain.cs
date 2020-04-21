@@ -61,7 +61,12 @@ namespace DetectObject
 
             //gioi han kich thuoc di vat phat hien
             Utilities.LIMIT_AREA = double.Parse(ConfigurationManager.AppSettings["LIMIT_AREA"]);
-            
+            log.Info("LIMIT_AREA: " + Utilities.LIMIT_AREA);
+
+            //quy uoc gioi han dut giay
+            Utilities.MAX_CONTOURS = int.Parse(ConfigurationManager.AppSettings["MAX_CONTOURS"]);            
+            log.Info("MAX_CONTOURS: " + Utilities.MAX_CONTOURS);
+
             // mo cong COM cho chuong den
             try
             {
