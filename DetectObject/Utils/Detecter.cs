@@ -21,7 +21,7 @@ namespace DetectObject.Utils
 
         public static bool DetectObject(Image<Bgr, byte> imgInput, out int heighOfObject, out string savedImagePath)
         {
-            var sobel = imgInput.Convert<Gray, byte>().Canny(10, 200);
+            var sobel = imgInput.Convert<Gray, byte>().Canny(50, 200);
             heighOfObject = 0;
             savedImagePath = string.Empty;
             Mat SE = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Cross, new Size(50, 1), new Point(-1, -1));
