@@ -273,15 +273,25 @@ namespace DetectObject
 
         private string LayTenCuonHienTai()
         {
-            int cuon = 1;
-            if (File.Exists(LocalSetting.m_strDataPath + "TenCuon.txt"))
+            // quy uoc ten cuon 2xxx-MM     2: Ten may xeo  xxx: stt cuon trong thang    MM: thang
+            string tencuon = "001-" + DateTime.Now.ToString("MM");
+            if (File.Exists(LocalSetting.m_strDataPath + "NewTenCuon.txt"))
             {
-                var name = File.ReadLines(LocalSetting.m_strDataPath + "TenCuon.txt").ToList();
-                cuon = Convert.ToInt32(name[0]) + 1;
-            }
-            File.WriteAllText(LocalSetting.m_strDataPath + "TenCuon.txt", cuon.ToString());
+                var name = File.ReadLines(LocalSetting.m_strDataPath + "NewTenCuon.txt").ToList();
+                var stt = name[0].Split('-')[0];
+                var month = name[0].Split('-')[1];
 
-            return "C" + cuon;
+                var currentMonth = DateTime.Now.ToString("MM");
+
+                if (currentMonth.Equals(month))
+                    tencuon = (int.Parse(stt) + 1).ToString().PadLeft(3, '0') + "-" + currentMonth;
+                else
+                    tencuon = "001-" + currentMonth;                
+            }
+
+            File.WriteAllText(LocalSetting.m_strDataPath + "NewTenCuon.txt", tencuon);
+
+            return "2" + tencuon;   // quy uoc ten cuon 2xxx-MM
         }
 
         private string TaoThuMucLuuLoi()
